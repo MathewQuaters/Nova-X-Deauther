@@ -1,9 +1,16 @@
-# Nova-X ᚾᚬᚢᛅ ᛋ
+<h1 align="center">
+  <br>
+  <a href="https://github.com/warwick320/Nova-X-5G-Deauther"><img src="https://github.com/warwick320/Nova-X-5G-Deauther/blob/main/img/logo.png" alt="Nova-X" width="200"></a>
+  <br>
+  Nova-X • ᚾᚬᚢᛅ ᛋ
+  <br>
+</h1>
 
 ![C++](https://img.shields.io/badge/C%2B%2B-00599C?logo=c%2B%2B&logoColor=white)
 ![ESP32](https://img.shields.io/badge/ESP32-2C2D72?logo=espressif&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
 ![License:  BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange)
+![Version](https://img.shields.io/badge/version-0.1.0--beta-blue)
 ![GitHub stars](https://img.shields.io/github/stars/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/warwick320/Nova-X-5G-Deauther)
@@ -168,6 +175,8 @@ https://espressif.github.io/arduino-esp32/package_esp32_index.json
 
 ### Step 2: Upload Sketch
 
+> Before upload sketch you need to patch your esp32 compiler - [patcher](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - ex) [my platform.txt](https://github.com/warwick320/Nova-X-5G-Deauther/blob/main/platform.txt)
+
 1. Open `nova-x-esp32c5/nova-x-esp32c5.ino`
 2. Configure board settings:
    - Board: ESP32C5 Dev Module
@@ -185,25 +194,6 @@ Tools > Serial Monitor
 Baud Rate: 115200
 ```
 
-## Project Structure
-
-```
-nova-x-esp32c5/
-├── nova-x-esp32c5.ino
-├── globals.h
-├── globals.cpp
-├── display.h
-├── display.cpp
-├── wifiP.h
-├── wifiP.cpp
-├── bt. h
-├── bt.cpp
-├── button.h
-├── button.cpp
-├── devices.h
-├── deivces.cpp
-└── bitmap.h
-```
 
 ## Usage
 
