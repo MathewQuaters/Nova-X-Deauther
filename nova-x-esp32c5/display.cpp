@@ -808,7 +808,8 @@ void nx::menu::drawSamsungAdv(){
 }
 
 void nx::menu::scanWiFi(){
-  while(! tx.scanComplete){
+  tx.scanComplete = false;
+  while(!tx.scanComplete){
     drawSubMenu("Scan", false, true);
     tx.performProgressiveScan();
     if(btn.btnPress(btnBack)) break;

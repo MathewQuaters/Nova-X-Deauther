@@ -166,7 +166,7 @@ git clone https://github.com/h2zero/NimBLE-Arduino.git
 
 ## Installation
 
-### Step 1: Board Setup
+### Step 1: Board Setup (If you need to modify the sketch)
 
 1. Open Arduino IDE
 2. Go to `File > Preferences`
@@ -179,6 +179,17 @@ https://espressif.github.io/arduino-esp32/package_esp32_index.json
 6. Select `Tools > Board > ESP32 Arduino > ESP32C5 Dev Module`
 
 ### Step 2: Upload Sketch
+
+> Recommended method is the first method
+
+### Method 1 (Upload via Image Uploader)
+
+1. Download the latest image uploader from the Release page
+2. Open image uploader
+3. Select the COM port to which the ESP32-C5 is connected
+4. Click Upload
+
+### Method 2 (Upload via Sketch)
 
 > Before upload sketch you need to patch your esp32 compiler - [patcher](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - ex) [my platform.txt](https://github.com/warwick320/Nova-X-5G-Deauther/blob/main/platform.txt)
 
