@@ -455,7 +455,7 @@ void nx::menu::drawSubMenu(const std::string& title, bool progressFlag, bool sca
 
 uint8_t nx::menu::getRandomChannel() {
   if(random(0, 2) == 0) return random(1, 12);
-  return channels5G[random(0, 9)];
+  return random(1, 12);
 }
 
 void nx::menu::generateRandomBSSID(uint8_t* bssid) {
@@ -463,20 +463,27 @@ void nx::menu::generateRandomBSSID(uint8_t* bssid) {
   bssid[0] &= 0xFE;
 }
 
-std::string nx::menu::modifySSIDWithSpaces(const std::string& ssid, int cloneCount) {
-  int spaceCount = (cloneCount % 25) + 1;
-  std::string modifiedSSID = ssid.empty() ? "Hidden_AP" : ssid;
-  for(int i = 0; i < spaceCount; i++) modifiedSSID += " ";
-  if(modifiedSSID.length() > 32) modifiedSSID = modifiedSSID.substr(0, 32);
-  return modifiedSSID;
+std::vector<std::array<uint8_t,6>> nx::menu::generateRandomBSSIDList(){
+  std::vector<std::array<uint8_t,6>> bssidList;
+  bssidList.reserve(MAX_SSID);
+  for( int i=0; i<MAX_SSID;i++){
+    std::array<uint8_t,6> bssid;
+    generateRandomBSSID(bssid.data());
+    bssidList.push_back(bssid);
+  }
+  return bssidList;
 }
+void nx::menu::executeAttackAll(const std::string& title,std::function<void()> attackFunc){
+  if(channelAPMap.empty()){
+    renderPopup("Scan First");
+    return;
+  }
 
-void nx::menu::sendBeaconForAP(const BSSIDInfo* ap, int& cloneCount) {
-  std::string modifiedSSID = modifySSIDWithSpaces(ap->ssid, cloneCount);
-  uint8_t fakeBSSID[6];
-  generateRandomBSSID(fakeBSSID);
-  tx.txBeaconFrame(modifiedSSID.c_str(), getRandomChannel(), fakeBSSID, ap->encrypted);
-  cloneCount++;
+  while(true){
+    drawSubMenu(title);
+    attackFunc();
+    if(btn.btnPress(btnBack)) break;
+  }
 }
 
 void nx::menu::executeChannelAttack(const char* attackType, std::function<void(uint8_t)> attackFunc) {
@@ -559,17 +566,8 @@ void nx::menu::executeSelectedAttack(const char* attackType, std::function<void(
 }
 
 void nx::menu::deauthAttack(){
-  if(channelAPMap.empty()){
-    renderPopup("Scan First");
-    return;
-  }
-  while(true){
-    drawSubMenu("Deauth All");
-    tx.txDeauthFrameAll();
-    if(btn.btnPress(btnBack)) break;
-  }
+  executeAttackAll("Deauth All",[this](){tx.txDeauthFrameAll();});
 }
-
 std::vector<std::string> nx::menu::getChannelList() {
   std::vector<std::string> channels;
   for(auto& entry : channelAPMap) {
@@ -662,15 +660,7 @@ void nx::menu::deauthSelected() {
 }
 
 void nx::menu::authAttack(){
-  if(channelAPMap.empty()){
-    renderPopup("Scan First");
-    return;
-  }
-  while(true){
-    drawSubMenu("Auth Flood");
-    tx.txAuthFlood();
-    if(btn.btnPress(btnBack)) break;
-  }
+  executeAttackAll("Auth Flood",[this](){tx.txAuthFlood();});
 }
 
 void nx::menu::authByChannel() {
@@ -686,15 +676,7 @@ void nx::menu::authSelected() {
 }
 
 void nx::menu::assocAttack(){
-  if(channelAPMap.empty()){
-    renderPopup("Scan First");
-    return;
-  }
-  while(true){
-    drawSubMenu("Assoc Flood");
-    tx.txAssocFlood();
-    if(btn.btnPress(btnBack)) break;
-  }
+  executeAttackAll("Assoc Flood",[this](){tx.txAuthFlood();});
 }
 
 void nx::menu::assocByChannel() {
@@ -719,33 +701,19 @@ void nx::menu::beaconAllSSID() {
     renderPopup("Scan First");
     return;
   }
-  
   std::vector<const BSSIDInfo*> allAPs;
-  for(auto& entry : channelAPMap) {
+  for(auto& entry :channelAPMap) {
     for(auto& apInfo : entry.second) {
       allAPs.push_back(&apInfo);
     }
   }
-  
   if(allAPs.empty()) {
     renderPopup("No SSIDs Found");
     return;
   }
-  
   char title[32];
   snprintf(title, sizeof(title), "Beacon %d SSIDs", (int)allAPs.size());
-  
-  int cloneCount = 0;
-  
-  while(true) {
-    drawSubMenu(std::string(title));
-    
-    for(const auto* ap : allAPs) {
-      sendBeaconForAP(ap, cloneCount);
-    }
-    
-    if(btn.btnPress(btnBack)) break;
-  }
+  executeBeaconAttack(allAPs, std::string(title));
 }
 
 void nx::menu::beaconSSIDDupe() {
@@ -753,7 +721,7 @@ void nx::menu::beaconSSIDDupe() {
     renderPopup("Scan First");
     return;
   }
-  if(selectedAPs.empty() || std::count(selectedAPs.begin(), selectedAPs.end(), true) == 0) {
+  if(selectedAPs.empty() || std::count(selectedAPs. begin(), selectedAPs.end(), true) == 0) {
     renderPopup("No APs Selected");
     return;
   }
@@ -772,17 +740,7 @@ void nx::menu::beaconSSIDDupe() {
   char title[32];
   snprintf(title, sizeof(title), "Beacon %d SSIDs", (int)selectedAPList.size());
   
-  int cloneCount = 0;
-  
-  while(true) {
-    drawSubMenu(std::string(title));
-    
-    for(const auto* ap : selectedAPList) {
-      sendBeaconForAP(ap, cloneCount);
-    }
-    
-    if(btn.btnPress(btnBack)) break;
-  }
+  executeBeaconAttack(selectedAPList, std::string(title));
 }
 
 void nx::menu::beaconDupeByChannel() {
@@ -809,44 +767,125 @@ void nx::menu::beaconDupeByChannel() {
       selectedIdx = (selectedIdx < (int)channelList.size() - 1) ? selectedIdx + 1 :  0;
       drawMenu(channelList, selectedIdx);
     }
-    if(btn.btnPress(btnOk)) {
+    if(btn. btnPress(btnOk)) {
       if(selectedIdx < (int)channelNumbers.size()) {
         uint8_t targetChannel = channelNumbers[selectedIdx];
+        std::vector<const BSSIDInfo*> channelAPs;
+        if(channelAPMap.find(targetChannel) != channelAPMap.end()) {
+          for(auto& apInfo : channelAPMap[targetChannel]) {
+            channelAPs.push_back(&apInfo);
+          }
+        }
+        
         char title[32];
         snprintf(title, sizeof(title), "Ch %d Beacon", targetChannel);
         
-        int cloneCount = 0;
-        
-        while(true) {
-          drawSubMenu(std::string(title));
-          if(channelAPMap.find(targetChannel) != channelAPMap.end()) {
-            for(auto& apInfo : channelAPMap[targetChannel]) {
-              sendBeaconForAP(&apInfo, cloneCount);
-            }
-          }
-          if(btn.btnPress(btnBack)) break;
-        }
+        executeBeaconAttack(channelAPs, std::string(title));
         drawMenu(channelList, selectedIdx);
       }
     }
     if(btn.btnPress(btnBack)) break;
   }
 }
+void nx::menu::beaconCustomPrefix(const std::string& prefix){
+  std::vector<std::string> ssidList;
+  std::vector<std::array<uint8_t,6>> bssidList;
+  std::vector<uint8_t> channelList;
+  std::vector<bool> encryptedList;
+  
+  ssidList.reserve(MAX_SSID);
+  bssidList.reserve(MAX_SSID);
+  channelList.reserve(MAX_SSID);
+  encryptedList.reserve(MAX_SSID);
+
+  for(int i = 0; i < MAX_SSID; i++) {
+    char ssidBuf[33];
+    snprintf(ssidBuf, sizeof(ssidBuf), "%s %d", prefix.c_str(), i + 1);
+    ssidList.push_back(std::string(ssidBuf));
+
+    std::array<uint8_t,6> bssid;
+    generateRandomBSSID(bssid.data());
+    bssidList.push_back(bssid);
+
+    channelList.push_back(getRandomChannel());
+    encryptedList.push_back(random(0, 2));
+  }
+  char title[32];
+  snprintf(title, sizeof(title), "%s Beacon", prefix.c_str());
+  
+  while(true){
+    drawSubMenu(std::string(title));
+
+    for (size_t i = 0; i < ssidList.size(); i++){
+      tx.txBeaconFrame(ssidList[i].c_str(),channelList[i],bssidList[i].data(),encryptedList[i]);
+      if(btn.btnPress(btnBack)) return;
+    }
+    if(btn.btnPress(btnBack)) break;
+  }
+
+}
+void nx::menu::executeBeaconAttack(const std::vector<const BSSIDInfo*>& apList, const std::string& title){
+  if(apList.empty()){
+    renderPopup("No APs to Attack");
+    return;
+  }
+  std::vector<std::string> allSSIDs;
+  std::vector<std::array<uint8_t,6>> allBSSIDs;
+  std::vector<uint8_t> allChannels;
+  std::vector<bool> allEncrypted;
+
+  for(const auto* ap : apList){
+    std::string baseSSID = ap->ssid.empty() ? "Hidden_AP" : ap->ssid;
+    
+    for (int i = 0; i < CLONES_PER_AP; i++){
+      int spaceCount = (i % 25) + 1;
+      std::string modifiedSSID = baseSSID;
+      for (int j=0; j<spaceCount;j++) modifiedSSID += " ";
+      if (modifiedSSID.length() > 32) modifiedSSID = modifiedSSID.substr(0,32);
+
+      std::array<uint8_t, 6> bssid;
+      generateRandomBSSID(bssid. data());
+
+      allSSIDs.push_back(modifiedSSID);
+      allBSSIDs.push_back(bssid);
+      allChannels.push_back(getRandomChannel());
+      allEncrypted.push_back(ap->encrypted);
+    }
+  }
+  while (true){
+    drawSubMenu(title);
+
+    for(size_t i = 0; i < allSSIDs.size();i++){
+      tx.txBeaconFrame(allSSIDs[i].c_str(),allChannels[i],allBSSIDs[i].data(),allEncrypted[i]);
+      if(btn.btnPress(btnBack)) return;
+    }
+  }
+}
+std::vector<std::string> nx::menu::getRandomSSID(){
+  std::vector<std::string> ssidList;
+  ssidList.reserve(MAX_SSID);
+  for (int i = 0; i<MAX_SSID; i++){
+    char randomSSID[33]; // ssid max len 32 + null terminator
+    int ssidLen = random(8,MAX_SSID_LEN);
+    for (int j = 0; j<ssidLen; j++) randomSSID[j] = charset[random(0,strlen(charset))];
+    randomSSID[ssidLen] = '\0';
+    ssidList.push_back(std::string(randomSSID));
+  }
+  return ssidList;
+}
+
 void nx::menu::beaconRandom() {
   while(true) {
     drawSubMenu("Random Beacon");
-    char randomSSID[33];
-    int ssidLen = random(8, 33);
     
-    for(int i = 0; i < ssidLen; i++) {
-      randomSSID[i] = charset[random(0, strlen(charset))];
+    std::vector<std::string> ssidList = getRandomSSID();
+    std::vector<std::array<uint8_t,6>> bssidList = generateRandomBSSIDList();
+
+    for (int i = 0; i < ssidList.size(); i++){
+      tx.txBeaconFrame(ssidList[i].c_str(), getRandomChannel(),bssidList[i].data(), random(0, 2));
+      if(btn.btnPress(btnBack)) return;
     }
-    randomSSID[ssidLen] = '\0';
     
-    uint8_t fakeBSSID[6];
-    generateRandomBSSID(fakeBSSID);
-    
-    tx.txBeaconFrame(randomSSID, getRandomChannel(),fakeBSSID, random(0, 2));
     if(btn.btnPress(btnBack)) break;
   }
 }

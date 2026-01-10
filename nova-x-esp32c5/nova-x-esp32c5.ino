@@ -24,7 +24,8 @@ std:: vector<menuItem> mainMenu = {
       menuItem("All SSIDs Dupe",[](){m.beaconAllSSID();},{}),    
       menuItem("Selected Dupe",[](){m.beaconSSIDDupe();},{}),  
       menuItem("Random",[](){m.beaconRandom();},{}),
-      menuItem("Channel",[](){m.beaconDupeByChannel();},{})
+      menuItem("Channel",[](){m.beaconDupeByChannel();},{}),
+      menuItem("Prefix",[](){m.beaconCustomPrefix(prefix);},{})
     }),
     menuItem("B.T Adv",nullptr,{
       menuItem("Samsung",[](){m.drawSamsungAdv();},{}),

@@ -8,6 +8,11 @@
 #include "bitmap.h"
 #include "bt.h"
 
+// Beacon
+#define MAX_SSID 60
+#define MAX_SSID_LEN 13
+#define CLONES_PER_AP 10
+
 struct menuItem {
   std::string name;
   std::function<void()> action;
@@ -22,7 +27,7 @@ namespace nx {
     static constexpr uint8_t channels5G[] = {36, 40, 44, 48, 149, 153, 157, 161, 165};
         
     static constexpr const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
-    static constexpr const char* info[] = {"v0.2.2-beta", "ESP32-C5", "warwick320"};
+    static constexpr const char* info[] = {"v1.2.2-beta", "ESP32-C5", "warwick320"};
     static constexpr int yOffsetTyping[] = {30, 40, 50}; 
 
     std::vector<std::string> prevMenuName;
@@ -92,15 +97,20 @@ namespace nx {
 
     std::vector<std::string> getChannelList();
     void getSSIDAndChannelLists(std::vector<std::string> &ssids, std::vector<std::string> &channels);
+
     std::string formatBSSID(const uint8_t* bssid);
     std::string truncateSSID(const std::string& ssid, size_t maxLen = 10);
+
     uint8_t getRandomChannel();
     void generateRandomBSSID(uint8_t* bssid);
+    std::vector<std::string> getRandomSSID();
+    std::vector<std::array<uint8_t,6>> generateRandomBSSIDList();
+    
+    //exec
+    void executeAttackAll(const std::string& title,std::function<void()> attackFunc);
     void executeChannelAttack(const char* attackType, std::function<void(uint8_t)> attackFunc);
-    std::string modifySSIDWithSpaces(const std::string& ssid, int cloneCount);
-    void sendBeaconForAP(const BSSIDInfo* ap, int& cloneCount);
     void executeSelectedAttack(const char* attackType, std::function<void(const BSSIDInfo&, uint8_t)> attackFunc);
-
+    void executeBeaconAttack(const std::vector<const BSSIDInfo*>& apList, const std::string& title);
   public:
     int index = 0;
     std::vector<bool> selectedAPs;
@@ -124,6 +134,7 @@ namespace nx {
     void beaconSSIDDupe();
     void beaconRandom();
     void beaconDupeByChannel();
+    void beaconCustomPrefix(const std::string& prefix);
     // Auth
     void authAttack();
     void authByChannel();

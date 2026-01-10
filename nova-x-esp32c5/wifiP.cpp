@@ -140,7 +140,7 @@ void nx::wifi::txBeaconFrame(const char* ssid, uint8_t channel, const uint8_t* b
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // BSSID - will be replaced
     0x00, 0x00,                          // Sequence
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Timestamp
-    0x64, 0x00,                          // Beacon interval
+    0xE8, 0x03,                          // Beacon interval
     0x01, 0x04                           // Capability (Open)
   };
   
@@ -152,7 +152,7 @@ void nx::wifi::txBeaconFrame(const char* ssid, uint8_t channel, const uint8_t* b
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // BSSID
     0x00, 0x00,                          // Sequence
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Timestamp
-    0x64, 0x00,                          // Beacon interval
+    0xE8, 0x03,                          // Beacon interval
     0x11, 0x04                           // Capability (Privacy bit set)
   };
   
