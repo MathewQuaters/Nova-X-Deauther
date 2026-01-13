@@ -5,7 +5,7 @@
 #include <array>
 
 #define STORE_LEN 64
-#define PER_PKT 3
+#define PER_PKT 10
 
 struct macAddr {
   uint8_t addr[6];
@@ -25,6 +25,40 @@ struct BSSIDInfo {
   }
 };
 
+// packet
+extern bool packetMonitorActive;
+
+extern uint32_t packets;
+extern uint32_t tmpDeauths;
+extern uint32_t deauths;
+extern uint32_t beaconPackets;
+extern uint32_t probePackets;
+extern uint32_t dataPackets;
+
+extern unsigned long snifferStartTime;
+extern unsigned long snifferPacketTime;
+extern unsigned long snifferChannelTime;
+
+extern bool channelHopping;
+
+#define SCAN_PACKET_LIST_SIZE 60
+#define PACKET_LIST_UPDATE_INTERVAL 1000 // 1 sec
+#define PACKET_MONITOR_CHANNEL_HOPPING_INTERVAL 1000 // 1 sec
+
+extern uint16_t packetList[SCAN_PACKET_LIST_SIZE];
+
+extern uint16_t packetListIdx;
+
+extern uint8_t currentChannelIdx;
+
+extern bool useOnlyNonDFS; 
+
+bool macBroadcast(const uint8_t* mac);
+bool macMulticast(const uint8_t mac);
+bool macValid(const uint8_t* mac);
+int findAP(const uint8_t* mac);
+bool isDFSChannel(uint8_t ch);
+// Lib
 namespace nx {
   class wifi {
   private:
@@ -50,10 +84,18 @@ namespace nx {
     void storeMac(const uint8_t* mac);
     bool checkedMac(const uint8_t* mac);
     void clearMacStored();
-    
+
     // Channel management
     void setBandChannel(uint8_t channel);
-    
+    uint8_t getCurrentChannel() const{ return currentChannel;}
+    void setChannelHopping(bool enable);
+    bool getChannelHopping();
+    void nextChannel();
+    void prevChannel();
+    void nextChannelToAP();
+    void setUseDFS(bool enable);
+    bool getUseDFS();
+
     // Scan functions
     int scanNetwork(bool all = true, uint8_t channel = 0);
     void performProgressiveScan();
@@ -74,5 +116,24 @@ namespace nx {
     // Association 
     void txAssocFrame(const uint8_t* bssid, const char* ssid, uint8_t channel);
     void txAssocFlood();
+
+    // Packet monitor
+    void startPacketMonitor();
+    void stopPacketMonitor();
+    void updatePacketMonitor();
+
+    bool isMonitoring();
+
+    // Packet
+    uint32_t getPacketRate();
+    uint32_t getDeauthCount();
+    uint32_t getBeaconCount();
+    uint32_t getProbeCount();
+    uint32_t getDataCount();
+    uint16_t getPacketAtIdx(int idx);
+    uint16_t getMaxPacket();
+    double getScaleFactor(uint8_t height);
+
   };
+
 }

@@ -66,32 +66,34 @@ int nx::menu::calcCheckboxRectWidth(const std::string &channel) {
 void nx::menu::drawBorder() {
   display.setFontMode(1);
   display.setBitmapMode(1);
-  display.drawLine(0, 0, 0, 21);
-  display.drawLine(1, 0, 22, 0);
+  display.drawLine(0, 2, 0, 22);
+  display.drawLine(2, 0, 22, 0);
   display.drawLine(1, 1, 1, 20);
   display.drawLine(2, 1, 21, 1);
   display.drawLine(2, 19, 2, 2);
   display.drawLine(3, 2, 20, 2);
-  display.drawLine(127, 1, 127, 22);
-  display.drawLine(106, 0, 127, 0);
+  display.drawLine(127, 2, 127, 22);
+  display.drawLine(106, 0, 125, 0);
   display.drawLine(126, 2, 126, 21);
   display.drawLine(107, 1, 126, 1);
-  display.drawLine(125, 20, 125, 3);
+  display.drawLine(125, 19, 125, 2);
   display.drawLine(108, 2, 125, 2);
-  display.drawLine(0, 41, 0, 62);
-  display.drawLine(1, 62, 22, 62);
-  display.drawLine(1, 42, 1, 61);
-  display.drawLine(2, 61, 21, 61);
-  display.drawLine(2, 60, 2, 43);
-  display.drawLine(3, 60, 20, 60);
-  display.drawLine(127, 40, 127, 61);
-  display.drawLine(106, 62, 127, 62);
-  display.drawLine(126, 42, 126, 61);
-  display.drawLine(107, 61, 126, 61);
-  display.drawLine(125, 60, 125, 43);
-  display.drawLine(108, 60, 125, 60);
-  display.drawEllipse(1, 31, 1, 4);
-  display.drawEllipse(126, 31, 1, 4);
+  display.drawLine(0, 42, 0, 61);
+  display.drawLine(2, 63, 22, 63);
+  display.drawLine(1, 43, 1, 62);
+  display.drawLine(2, 62, 21, 62);
+  display.drawLine(2, 61, 2, 44);
+  display.drawLine(3, 61, 20, 61);
+  display.drawLine(127, 42, 127, 61);
+  display.drawLine(106, 63, 125, 63);
+  display.drawLine(126, 43, 126, 61);
+  display.drawLine(107, 62, 126, 62);
+  display.drawLine(125, 61, 125, 44);
+  display.drawLine(108, 61, 125, 61);
+  display.drawLine(1, 28, 1, 36);
+  display.drawLine(2, 29, 2, 35);
+  display.drawLine(126, 28, 126, 36);
+  display.drawLine(125, 29, 125, 35);
 }
 
 void nx::menu::renderRoundRect(int x, int y, int w, int h) {
@@ -921,6 +923,86 @@ void nx::menu::drawAbout(){
   };
   renderTyping(info, yOffsetTyping, 3, displayDuration, drawBg);
 }
+
+void nx::menu::drawPacketMonitor(){
+  tx.setUseDFS(false);
+  tx.startPacketMonitor();
+  tx.setChannelHopping(true);
+  uint32_t lastUpdate = 0;
+  uint8_t ch = 0;
+  while (true){
+    tx.updatePacketMonitor();
+    if(millis() - lastUpdate > PACKET_BAR_INTERVAL){
+      lastUpdate = millis();
+      display.clearBuffer();
+      char header[32];
+      ch = tx.getCurrentChannel();
+      const char* band = (ch > 14) ? "5G" : "2G";
+      const char* hop = tx.getChannelHopping() ? "HOP" : "FIX";
+
+      snprintf(header,sizeof(header),"%s CH%d %s",band,ch,hop);
+      display.drawStr(0,8,header);
+
+      char rate[16];
+      snprintf(rate,sizeof(rate),"%lupps",tx.getPacketRate());
+      display.drawStr(90,8,rate);
+
+      uint16_t maxPacket = tx.getMaxPacket();
+      if(maxPacket > 0){
+        double scale = tx.getScaleFactor(SCREEN_HEIGHT - 12);
+
+      // BAR
+
+      //   int x = 0;
+      //   for (int i = 0; i < SCAN_PACKET_LIST_SIZE && x < SCREEN_WIDTH; i++){
+      //     uint16_t pktCount = tx.getPacketAtIdx(i);
+      //     int y = 63 - (pktCount * scale);
+
+      //     if(pktCount > 0){
+      //       display.drawLine(x,63,x,y);
+      //       x++;
+      //       display.drawLine(x,63,x,y);
+      //       x++;
+      //     }
+      //     else x += 2;
+      //   }
+
+      // LINE
+
+        int prevX = -1;
+        int prevY = -1;
+
+        for (int i = 0; i < SCAN_PACKET_LIST_SIZE; i++){
+          uint16_t pktCount = tx.getPacketAtIdx(i);
+          int x =  i * 2; // 2 pixel distance
+          int y = 63 - (pktCount * scale);
+
+          if(x >= SCREEN_WIDTH) break;
+
+          display.drawPixel(x,y);
+
+          if(prevX >= 0 && prevY >= 0) display.drawLine(prevX,prevY,x,y);
+          prevX = x;
+          prevY = y;
+        }
+      }
+      display.sendBuffer();
+    }
+    if(btn.btnPress(btnUp)) {
+      tx.setChannelHopping(false);
+      tx.nextChannel();
+      Serial.printf("[PKT] Manual Channel: %d\n",ch);
+    }
+    if(btn.btnPress(btnDown)){
+      tx.setChannelHopping(false);
+      tx.prevChannel();
+      Serial.printf("[PKT] Manual Channel: %d\n",ch);
+    }
+    if(btn.btnPress(btnBack)) break;
+  }
+  tx.stopPacketMonitor();
+}
+
 void nx::menu::menuHandler(std::vector<menuItem> &menu, int index) {
   std::vector<std::string> menuNames;
   for (const auto &m : menu) menuNames.push_back(m.name);
@@ -953,3 +1035,4 @@ void nx::menu::menuHandler(std::vector<menuItem> &menu, int index) {
     if (indexChanged) drawMenu(menuNames, index);
   }
 }
+

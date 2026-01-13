@@ -33,6 +33,7 @@ std:: vector<menuItem> mainMenu = {
     })
   }),
   menuItem("Scan",[](){m.scanWiFi();},{}),
+  menuItem("Packet Monitor",[](){m.drawPacketMonitor();},{}),
   menuItem("Settings",nullptr,{
     menuItem("Select APs",[](){m.drawSelectMenu();},{})
   }),

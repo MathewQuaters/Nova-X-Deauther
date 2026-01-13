@@ -10,7 +10,7 @@
 ![ESP32](https://img.shields.io/badge/ESP32-2C2D72?logo=espressif&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
 ![License:  BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange)
-![Version](https://img.shields.io/badge/version-0.2.2--beta-blue)
+![Version](https://img.shields.io/badge/version-1.1.0--beta-blue)
 ![GitHub stars](https://img.shields.io/github/stars/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/warwick320/Nova-X-5G-Deauther)
@@ -63,6 +63,12 @@ WiFi security testing and BLE advertisement tool specifically designed for ESP32
 - Selected SSID cloning
 - Random SSID generation
 - Channel-specific beacon flooding
+- Custom Prefix beacon flooding
+
+**Packet Monitor**
+- Automatic channel hopping across 2.4Ghz ~ 5Ghz
+- Packet rate visualization using line graph
+
 
 ### BLE Advertisement Spoofing
 
@@ -262,7 +268,8 @@ Nova-X ESP32C5
 │   │   ├── All SSIDs Dupe
 │   │   ├── Selected Dupe
 │   │   ├── Random
-│   │   └── Channel
+|   |   ├── Channel
+│   │   └── Prefix
 │   │
 │   └── B. T Adv
 │       ├── Samsung
@@ -270,6 +277,8 @@ Nova-X ESP32C5
 │
 ├── Scan
 │
+├── Packet Monitor
+|
 ├── Settings
 │   └── Select APs
 │
@@ -312,7 +321,7 @@ Tagged Parameters:  SSID, Supported Rates
 Frame Control:     0x80 0x00
 Fixed Parameters: 
   - Timestamp
-  - Beacon Interval:  0x64 0x00
+  - Beacon Interval:  0xE8 0x03
   - Capability Info:  0x21 0x00
 Tagged Parameters: SSID, Rates, Channel
 ```
@@ -370,6 +379,11 @@ void clearMacStored();
 #define STORE_LEN 64        // MAC address cache
 #define PER_PKT 3           // Packets per target
 #define MAX_TX_POWER ESP_PWR_LVL_P20  // 20dBm transmit power
+
+#define MAX_SSID 60 // Max ssid list
+#define MAX_SSID_LEN 13 // Max ssid len
+#define CLONES_PER_AP 10 // Clones per ap
+
 ```
 
 ## Legal Disclaimer

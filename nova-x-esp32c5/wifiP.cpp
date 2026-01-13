@@ -7,6 +7,31 @@
 #include <vector>
 #include <array>
 
+// packet
+bool packetMonitorActive = false;
+
+uint32_t packets = 0;
+uint32_t tmpDeauths = 0;
+uint32_t deauths = 0;
+uint32_t beaconPackets = 0;
+uint32_t probePackets = 0;
+uint32_t dataPackets = 0;
+
+unsigned long snifferStartTime = 0;
+unsigned long snifferPacketTime = 0;
+unsigned long snifferChannelTime = 0;
+
+bool channelHopping = false;
+
+uint16_t packetList[SCAN_PACKET_LIST_SIZE] = {0};
+
+uint16_t packetListIdx = 0;
+
+uint8_t currentChannelIdx = 0;
+
+bool useOnlyNonDFS = true;
+
+// Lib
 macAddr macStore[STORE_LEN];
 uint8_t macCursor = 0;
 
@@ -45,6 +70,96 @@ void nx::wifi::clearMacStored(){
   macCursor = 0;
 }
 
+bool macBroadcast(const uint8_t* mac){
+  return (mac[0] == 0xFF && mac[1] == 0xFF &&mac[2] == 0xFF &&mac[3] == 0xFF &&mac[4] == 0xFF &&mac[5] == 0xFF);
+}
+
+bool macMulticast(const uint8_t* mac){
+  return (mac[0] & 0x01);
+}
+
+bool macValid(const uint8_t* mac){
+  if(mac[0] == 0x00 &&mac[1] == 0x00 &&mac[2] == 0x00 &&mac[3] == 0x00 &&mac[4] == 0x00 &&mac[5] == 0x00) return false;
+  return true;
+}
+
+int findAP(const uint8_t* mac){
+  for (auto& entry: channelAPMap){
+    for(auto& ap : entry.second){
+      if(memcmp(ap.bssid.data(),mac,6) == 0){
+        return 1; // found
+      }
+    }
+  }
+  return -1; // not found
+}
+
+bool isDFSChannel(uint8_t ch){
+  return(ch >= 52 && ch <= 140);
+}
+
+void IRAM_ATTR snifferCallback(void* buf , wifi_promiscuous_pkt_type_t type){
+  if (!packetMonitorActive) return;
+  
+  wifi_promiscuous_pkt_t* pkt = (wifi_promiscuous_pkt_t*) buf;
+
+  if(type != WIFI_PKT_MGMT && type != WIFI_PKT_DATA) return;
+
+  const wifi_pkt_rx_ctrl_t* ctrl = &pkt->rx_ctrl;
+  const uint8_t* payload = pkt->payload;
+  uint16_t len = ctrl->sig_len;
+
+  packets++;
+
+  if(len < 28) return;
+
+  uint8_t frameControl = payload[0]; // check frame type ex) deauth = 0xC0
+  uint8_t frameType = frameControl & 0x0C;
+  uint8_t frameSubtype = (frameControl & 0xF0) >> 4;
+
+  if(frameType == 0x00){ //MGMT
+    switch(frameSubtype){
+      case 0x0C: // deauth
+      case 0x0A: // disassoc
+        tmpDeauths++;
+        return;
+      case 0x08: // beacon
+        beaconPackets++;
+        return;
+      case 0x04: // probe reqest
+      case 0x05: // probe response
+        probePackets++;
+        return;
+
+      default:
+        break;
+    }
+  }
+  // Data Frame (0x08 , 0x88 etc.)
+  if(frameType == 0x08){
+    dataPackets++;
+    // Addr 1 (Receiver): offset 4
+    // Addr 2 (Transmitter): offset 10
+    // Addr 3 (Bssid): offset16
+    const uint8_t* addr1 = &payload[4];
+    const uint8_t* addr2 = &payload[10];
+
+    if(macBroadcast(addr1) || macBroadcast(addr2) || !macValid(addr1) || !macValid(addr2) || macMulticast(addr1) || macMulticast(addr2)) return;
+
+    int apFound = findAP(addr2);
+    if(apFound >= 0){
+      // Station add (addr1 -> station)
+    }
+    else{
+      apFound = findAP(addr1);
+      if(apFound >=0){
+        // Station add (addr2 -> station)
+      }
+    }
+  
+  }
+}
+
 void nx::wifi::setBandChannel(uint8_t channel){
   if(currentChannel == channel) return;
   
@@ -52,6 +167,84 @@ void nx::wifi::setBandChannel(uint8_t channel){
   esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
   currentChannel = channel;
   delay(10);
+}
+
+void nx::wifi::setChannelHopping(bool enable){
+  channelHopping = enable;
+  if(enable){
+    currentChannelIdx = 0;
+    snifferChannelTime = millis();
+    debug_print("Channel Hopping enabled");
+  }
+  else debug_print("Channel Hopping disabled");
+}
+
+bool nx::wifi::getChannelHopping(){
+  return channelHopping;
+}
+
+void nx::wifi::nextChannel(){
+  do{
+    currentChannelIdx++;
+    
+    if(currentChannelIdx >= channelCount) currentChannelIdx = 0;
+
+    if(useOnlyNonDFS && isDFSChannel(channelList[currentChannelIdx])) continue;
+    
+    break;
+  } while(true);
+
+  uint8_t ch = channelList[currentChannelIdx];
+  setBandChannel(ch);
+}
+
+void nx::wifi::prevChannel(){
+  do{
+
+    if(currentChannelIdx == 0) currentChannelIdx = channelCount - 1;
+    else currentChannelIdx--;
+
+    if(useOnlyNonDFS && isDFSChannel(channelList[currentChannelIdx])) continue;
+
+    break;
+  } while(true);
+
+  uint8_t ch = channelList[currentChannelIdx];
+  setBandChannel(ch);
+}
+
+void nx::wifi::nextChannelToAP(){
+  if(channelAPMap.empty()){
+    nextChannel();
+    return;
+  }
+
+  auto it = channelAPMap.upper_bound(currentChannel);
+
+  if(it == channelAPMap.end()) it = channelAPMap.begin();
+  if(it != channelAPMap.end()){
+    uint8_t nextCh = it->first;
+    setBandChannel(nextCh);
+
+    for(size_t i = 0;i<channelCount;i++){
+      if(channelList[i] == nextCh){
+        currentChannelIdx = i;
+        break;
+      }
+    }
+  }
+}
+
+
+
+
+
+void nx::wifi::setUseDFS(bool enable){
+  useOnlyNonDFS =! enable;
+}
+
+bool nx::wifi::getUseDFS(){
+  return ! useOnlyNonDFS;
 }
 
 // IEEE 802.11 deauthentication frame template with reason code 7 (Class 3 frame received from nonassociated STA)
@@ -497,4 +690,117 @@ void nx::wifi::performProgressiveScan(){
       scanComplete = true;
     }
   }
+}
+
+void nx::wifi::startPacketMonitor(){
+  if(packetMonitorActive) return;
+  // init
+  packets = 0;
+  tmpDeauths = 0;
+  deauths = 0;
+  beaconPackets = 0;
+  probePackets = 0;
+  dataPackets = 0;
+  memset(packetList, 0 ,sizeof(packetList));
+  packetListIdx = 0;
+
+  snifferStartTime = millis();
+  snifferPacketTime = millis();
+  snifferChannelTime = millis();
+  channelHopping = false;
+
+  wifi_promiscuous_filter_t filter={
+    .filter_mask = WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA
+  };
+
+  esp_wifi_set_promiscuous_filter(&filter);
+  esp_wifi_set_promiscuous_rx_cb(&snifferCallback);
+  esp_wifi_set_promiscuous(true);
+
+  packetMonitorActive = true;
+
+  debug_print("Packet Monitor started");
+}
+
+void nx::wifi::stopPacketMonitor(){
+  if(!packetMonitorActive) return;
+
+  esp_wifi_set_promiscuous(false);
+  esp_wifi_set_promiscuous_rx_cb(nullptr);
+
+  packetMonitorActive = false;
+
+  debug_print("Packet Monitor stopped");
+}
+
+void nx::wifi::updatePacketMonitor(){
+  if(!packetMonitorActive) return;
+
+  unsigned long currentTime = millis();
+
+  if(currentTime - snifferPacketTime > PACKET_LIST_UPDATE_INTERVAL){
+    snifferPacketTime = currentTime;
+
+    packetList[packetListIdx] = packets;
+    packetListIdx = (packetListIdx + 1) % SCAN_PACKET_LIST_SIZE;
+
+    deauths = tmpDeauths;
+    tmpDeauths = 0;
+
+    packets = 0;
+
+    #ifdef DEBUG_PACKET_MONITOR
+    Serial.printf("[PKT] Rate: %upps, Deauths: %lu, Beacons: %lu, Probes: %lu, Data: %lu \n",getPacketRate(),deauths,beaconPackets,probePackets,dataPackets);
+    #endif
+  }
+
+  if(channelHopping && (currentTime - snifferChannelTime > PACKET_MONITOR_CHANNEL_HOPPING_INTERVAL)){
+    snifferChannelTime = currentTime;
+
+    if(channelAPMap.empty()) nextChannel();
+    else nextChannelToAP();
+  }
+}
+
+bool nx::wifi::isMonitoring(){
+  return packetMonitorActive;
+}
+
+uint32_t nx::wifi::getPacketRate(){
+  if(packetListIdx == 0) return packetList[SCAN_PACKET_LIST_SIZE - 1];
+  return packetList[packetListIdx - 1];
+}
+
+uint32_t nx::wifi::getDeauthCount(){
+  return deauths;
+}
+uint32_t nx::wifi::getBeaconCount(){
+  return beaconPackets;
+}
+uint32_t nx::wifi::getProbeCount(){
+  return probePackets;
+}
+uint32_t nx::wifi::getDataCount(){
+  return dataPackets;
+}
+
+uint16_t nx::wifi::getPacketAtIdx(int idx){
+  int pIdx = (packetListIdx + idx) % SCAN_PACKET_LIST_SIZE;
+  return packetList[pIdx];
+}
+
+uint16_t nx::wifi::getMaxPacket(){
+  uint16_t max = 0;
+
+  for(uint8_t i = 0; i < SCAN_PACKET_LIST_SIZE; i++){
+    if(packetList[i] > max) max = packetList[i];
+  }
+  if(max == 0) max = 1;
+  return max;
+}
+
+double nx::wifi::getScaleFactor(uint8_t height){
+  uint16_t maxPkt = getMaxPacket();
+  if(maxPkt == 0) return 0.0;
+  return (double)height / (double)maxPkt;
 }

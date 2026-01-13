@@ -13,6 +13,10 @@
 #define MAX_SSID_LEN 13
 #define CLONES_PER_AP 10
 
+// packet monitor
+#define PACKET_BAR_INTERVAL 100 // 100 ms -> 10FPS
+
+
 struct menuItem {
   std::string name;
   std::function<void()> action;
@@ -27,7 +31,7 @@ namespace nx {
     static constexpr uint8_t channels5G[] = {36, 40, 44, 48, 149, 153, 157, 161, 165};
         
     static constexpr const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
-    static constexpr const char* info[] = {"v1.2.2-beta", "ESP32-C5", "warwick320"};
+    static constexpr const char* info[] = {"v1.1.0-beta", "ESP32-C5", "warwick320"};
     static constexpr int yOffsetTyping[] = {30, 40, 50}; 
 
     std::vector<std::string> prevMenuName;
@@ -122,6 +126,9 @@ namespace nx {
     void drawSubMenu(const std::string& title, bool progressFlag = true, bool scanFlag = false);
     void drawMenu(const std::vector<std::string> &items, int index);
     void menuHandler(std::vector<menuItem> &menu, int index);
+
+    // ==== Attack ====
+
     // BlueTooth ADV
     void drawIosAdv();
     void drawSamsungAdv();
@@ -143,10 +150,18 @@ namespace nx {
     void assocAttack();
     void assocByChannel();
     void assocSelected();
+    
+    // ================
+
+    // PacketMonitor
+    void drawPacketMonitor();
+
     // Settings
     void drawSelectMenu();
     void drawMenuWithCheckbox(const std::vector<std::string> &ssids, const std::vector<std::string> &channels, const std::vector<bool> &checked, int index);
     // About
     void drawAbout();
   };
+
 }
+
