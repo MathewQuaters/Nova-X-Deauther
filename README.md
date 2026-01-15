@@ -10,7 +10,7 @@
 ![ESP32](https://img.shields.io/badge/ESP32-2C2D72?logo=espressif&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
 ![License:  BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange)
-![Version](https://img.shields.io/badge/version-1.2.0--beta-blue)
+![Version](https://img.shields.io/badge/version-1.3.0--beta-blue)
 ![GitHub stars](https://img.shields.io/github/stars/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/warwick320/Nova-X-5G-Deauther)
@@ -250,9 +250,13 @@ Nova-X ESP32C5
 │
 ├── Exploit
 │   ├── Deauth
-│   │   ├── All APs
-│   │   ├── Channel
-│   │   └── Selected
+│   │   │  
+│   │   ├── APs
+│   │   │   ├── All APs
+│   │   │   ├── Channel
+│   │   │   └── Selected
+│   │   └── STAs
+│   │        └── Selected
 │   │
 │   ├── Auth
 │   │   ├── All APs
@@ -280,7 +284,8 @@ Nova-X ESP32C5
 ├── Packet Monitor
 |
 ├── Settings
-│   └── Select APs
+│   ├── Select APs
+│   └── Select STAs
 │
 └── About
 ```
@@ -293,7 +298,7 @@ Nova-X ESP32C5
 ```cpp
 Frame Control:     0xC0 0x00
 Duration:          0x3A 0x01
-Destination MAC:   FF:FF:FF:FF:FF:FF (broadcast)
+Destination MAC:   FF:FF:FF:FF:FF:FF (broadcast or Selected STA Mac)
 Source MAC:        [Target AP BSSID]
 BSSID:             [Target AP BSSID]
 Sequence:          0x00 0x00
@@ -361,29 +366,6 @@ Type:         0xFF (Manufacturer Specific)
 Company ID:   0x75 0x00 (Samsung Electronics)
 Subtype:      0x01
 Model:        [device-specific byte]
-```
-
-### MAC Address Management
-
-```cpp
-#define STORE_LEN 64  // MAC address cache size
-
-bool checkedMac(const uint8_t* mac);
-void storeMac(const uint8_t* mac);
-void clearMacStored();
-```
-
-### Attack Configuration
-
-```cpp
-#define STORE_LEN 64        // MAC address cache
-#define PER_PKT 3           // Packets per target
-#define MAX_TX_POWER ESP_PWR_LVL_P20  // 20dBm transmit power
-
-#define MAX_SSID 60 // Max ssid list
-#define MAX_SSID_LEN 13 // Max ssid len
-#define CLONES_PER_AP 10 // Clones per ap
-
 ```
 
 ## Legal Disclaimer

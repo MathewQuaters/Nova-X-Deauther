@@ -148,7 +148,7 @@ void nx::menu::renderCheckbox(int x, int y, bool checked) {
   if(checked) display.drawBox(x + 1, boxY + 1, checkboxSize - 2, checkboxSize - 2);
 }
 
-void nx::menu::renderLineWithCheckbox(const std::string &ssid, const std::string &channel, int y, bool checked, bool selected) {
+void nx::menu::renderLineWithCheckbox(const std::string &ssid, const std::string &channel, int y, bool checked, bool selected,int itemIndex) {
   renderCheckbox(checkboxX, y, checked);
   
   int channelWidth = display.getStrWidth(channel.c_str());
@@ -159,8 +159,10 @@ void nx::menu::renderLineWithCheckbox(const std::string &ssid, const std::string
     int rectWidth = calcCheckboxRectWidth(channel);
     renderRoundRect(rectStartX, y, rectWidth, lineHeight);
   }
+
+  std::string displaySSID = getDisplaySSID(ssid,itemIndex,selected);
   
-  display.drawStr(ssidStartX, textY, ssid.c_str());
+  display.drawStr(ssidStartX + 2, textY, displaySSID.c_str());
   display.drawStr(channelX, textY, channel.c_str());
 }
 
@@ -255,6 +257,55 @@ void nx::menu::drawInitialAnimation(const std::vector<std::string> &items, int i
   }
 }
 
+void nx::menu::updateScrollState(int selectedIdx){
+  if(selectedIdx != lastScrollIndex){
+    lastSelectionTime = millis();
+    isScrolling = false;
+    scrollOffset = 0;
+    lastScrollIndex = selectedIdx;
+    return;
+  }
+  unsigned long now = millis();
+
+  if(!isScrolling && (now - lastSelectionTime >= SCROLL_DELAY)){
+    isScrolling = true;
+    lastSelectionTime = now;
+  }
+
+  if(isScrolling){
+    if(now-lastSelectionTime >= SCROLL_DURATION){
+      isScrolling = false;
+      scrollOffset = 0;
+      lastSelectionTime = now;
+    }
+  }
+}
+
+std::string nx::menu::getDisplaySSID(const std::string& ssid,int idx,bool isSelected){
+  if(ssid.empty() || ssid == "") return "<Hidden>";
+  if(ssid.length() <= 13) return ssid;
+
+  //if(ssid.length() <= MAX_STR_DISPLAY_LEN) return ssid;
+  if(!isSelected) return truncateSSID(ssid,MAX_STR_DISPLAY_LEN);
+  
+  updateScrollState(idx);
+
+  if(isScrolling){
+    unsigned long elapsed = millis() - lastSelectionTime;
+    float progress = (float)elapsed / SCROLL_DURATION;
+    progress = std::min(progress,1.0f);
+
+    float eased = (progress < 0.5f) ? 2 * progress * progress : 1 - powf(-2*progress + 2,2) /2;
+    
+    int maxOffset = (int)ssid.length() - 13;
+    
+    scrollOffset = (int)roundf(maxOffset * eased);
+    scrollOffset = std::clamp(scrollOffset,0,maxOffset);
+    return ssid.substr(scrollOffset,13);
+  }
+  return truncateSSID(ssid,MAX_STR_DISPLAY_LEN);
+}
+
 void nx::menu::drawSelectionAnimation(const std::vector<std::string> &items, int newIdx) {
   int oldIdx = (prevSelected < 0 || prevSelected >= menuSize) ? 0 : prevSelected;
   int oldStart = calcStartIndex(oldIdx);
@@ -324,6 +375,11 @@ void nx::menu::drawCheckboxInitialAnimation(const std::vector<std::string> &ssid
   unsigned long fadeDuration = lineAnimDuration + maxVisible * lineDelay;
   uint8_t currentBr = 0;
 
+  lastSelectionTime = millis();
+  isScrolling = false;
+  scrollOffset = 0;
+  lastScrollIndex = idx;
+
   while (millis() < endT) {
     unsigned long now = millis();
     float fadeProgress = std::min(1.0f,float(now - startT) / fadeDuration);
@@ -349,7 +405,7 @@ void nx::menu::drawCheckboxInitialAnimation(const std::vector<std::string> &ssid
       if (currentY > -lineHeight && currentY < SCREEN_HEIGHT) {
         bool isSelected = (startIdx + i == idx);
         bool isChecked = (startIdx + i < (int)checked.size()) ?  checked[startIdx + i] :  false;
-        renderLineWithCheckbox(ssids[startIdx + i], channels[startIdx + i], currentY, isChecked, isSelected);
+        renderLineWithCheckbox(ssids[startIdx + i], channels[startIdx + i], currentY, isChecked, isSelected,startIdx + i);
       }
     }
     display.sendBuffer();
@@ -370,6 +426,11 @@ void nx::menu::drawCheckboxSelectionAnimation(const std::vector<std::string> &ss
   unsigned long startT = millis();
   unsigned long endT = startT + animDuration;
 
+  lastSelectionTime = millis();
+  isScrolling = false;
+  scrollOffset = 0;
+  lastScrollIndex = newIdx;
+
   while (millis() < endT) {
     float t = std::min(1.0f, float(millis() - startT) / animDuration);
     float eased = (t < 0.5f) ? 4 * t * t * t : 1 - powf(-2 * t + 2, 3) / 2;
@@ -386,7 +447,8 @@ void nx::menu::drawCheckboxSelectionAnimation(const std::vector<std::string> &ss
     for (int i = 0; i < maxVisible + 1 && baseIdx + i < menuSize; i++) {
       int itemY = yOffset + i * lineHeight;
       bool isChecked = (baseIdx + i < (int)checked.size()) ? checked[baseIdx + i] :  false;
-      renderLineWithCheckbox(ssids[baseIdx + i], channels[baseIdx + i], itemY, isChecked, false);
+
+      renderLineWithCheckbox(ssids[baseIdx + i], channels[baseIdx + i], itemY, isChecked, false,baseIdx + i);
     }
     
     renderRoundRect(rectStartX, curY, curW, lineHeight);
@@ -405,7 +467,8 @@ void nx::menu::drawCheckboxFrame(const std::vector<std::string> &ssids, const st
   for (int i = 0; i < maxVisible && startIdx + i < menuSize; i++) {
     bool isSelected = (startIdx + i == idx);
     bool isChecked = (startIdx + i < (int)checked.size()) ? checked[startIdx + i] : false;
-    renderLineWithCheckbox(ssids[startIdx + i], channels[startIdx + i], y, isChecked, isSelected);
+    
+    renderLineWithCheckbox(ssids[startIdx + i], channels[startIdx + i], y, isChecked, isSelected,startIdx + i);
     y += lineHeight;
   }
   display.sendBuffer();
@@ -689,6 +752,90 @@ void nx::menu::executeSelectedAttack(const char* attackType, std::function<void(
 void nx::menu::deauthAttack(){
   executeAttackAll("Deauth All",[this](){tx.txDeauthFrameAll();});
 }
+
+void nx::menu::getSTALists(std::vector<std::string> &macs,std::vector<std::string> &channels){
+  macs.clear();
+  channels.clear();
+
+  if(tx.getSTACount() == 0){
+    macs.push_back("No STAs Found");
+    channels.push_back("");
+    return;
+  }
+
+  for(auto& entry: channelSTAMap){
+    uint8_t channel = entry.first;
+    auto& stations = entry.second;
+
+    for(auto& sta:stations){
+      char macStr[24];
+      snprintf(macStr,sizeof(macStr),"%02X:%02X:%02X:%02X:%02X:%02X",sta.staMac[0],sta.staMac[1],sta.staMac[2],sta.staMac[3],sta.staMac[4],sta.staMac[5]);
+      macs.push_back(std::string(macStr));
+
+      char chStr[8];
+      int freq = (channel < 15) ? 2:5;
+      snprintf(chStr,sizeof(chStr),"%dG",freq);
+      channels.push_back(std::string(chStr));
+    }
+  }
+}
+
+void nx::menu::drawSelectMenuSTA() {
+  if(channelSTAMap.empty()){
+    renderPopup("Scan STA first");
+    popupFlag = true;
+    return;
+  }
+  std::vector<std::string> macList;
+  std::vector<std::string> channelList;
+  
+  getSTALists(macList,channelList);
+
+  executeSelectMenu(macList,channelList,selectedSTAs,"No STAs Found");
+}
+
+void nx::menu::attackSelectedBySTAs(){
+  if(channelSTAMap.empty()) {
+    renderPopup("Scan First");
+    popupFlag = true;
+    return;
+  }
+  popupFlag = false;
+  
+  if(selectedSTAs.empty()) {
+    renderPopup("No STAs Selected");
+    return;
+  }
+  
+  int selectedCount = 0;
+  for(bool sel : selectedSTAs) if(sel) selectedCount++;
+  
+  if(selectedCount == 0) {
+    renderPopup("No STAs Selected");
+    return;
+  }
+  
+  char title[32];
+  snprintf(title, sizeof(title), "Attack %d STAs", selectedCount);
+  
+  while(true) {
+    drawSubMenu(std::string(title));
+    
+    size_t idx = 0;
+    for(auto& entry : channelSTAMap) {
+      uint8_t channel = entry.first;
+      auto& stations = entry.second;
+      
+      for(auto& sta : stations) {
+        if(idx < selectedSTAs.size() && selectedSTAs[idx]) tx.txDeauthFrameSTA(sta.staMac. data(), sta.apMac.data(), channel);
+        idx++;
+      }
+    }
+    
+    if(btn.btnPress(btnBack)) break;
+  }
+}
+
 std::vector<std::string> nx::menu::getChannelList() {
   std::vector<std::string> channels;
   for(auto& entry : channelAPMap) {
@@ -721,9 +868,10 @@ void nx::menu::getSSIDAndChannelLists(std::vector<std::string> &ssids, std::vect
   
   for(auto& entry : channelAPMap) {
     for(auto& apInfo : entry.second) {
-      std::string ssid = (apInfo.ssid.empty() || apInfo.ssid == "") ? "<Hidden>" : truncateSSID(apInfo.ssid, 10);
+      std::string ssid = (apInfo.ssid.empty() || apInfo.ssid == "") ? "<Hidden>" : apInfo.ssid;
       char chStr[8];
-      snprintf(chStr, sizeof(chStr), "Ch%d", entry.first);
+      int freq = (entry.first < 15) ? 2:5;
+      snprintf(chStr, sizeof(chStr), "%dG", freq);
       ssids.push_back(ssid);
       channels.push_back(std::string(chStr));
     }
@@ -739,43 +887,57 @@ void nx::menu::deauthByChannel() {
   executeChannelAttack("Attack", [this](uint8_t ch) {tx.txDeauthFrameChannel(ch);});
 }
 
-void nx::menu::drawSelectMenu() {
-  if(channelAPMap.empty()) {
-    renderPopup("Scan First");
+void nx::menu::executeSelectMenu(std::vector<std::string>& items,std::vector<std::string>& channels,std::vector<bool>& selectedFlags,const std::string& emptyMessage){
+  if(items.empty() || (items.size() == 1 && items[0] == emptyMessage)){
+    renderPopup(emptyMessage);
     popupFlag = true;
-    return;
   }
   popupFlag = false;
-  
-  std::vector<std::string> ssidList;
-  std::vector<std::string> channelList;
-  getSSIDAndChannelLists(ssidList, channelList);
-  
-  if(selectedAPs.size() != ssidList.size()) {
-    selectedAPs.clear();
-    selectedAPs.resize(ssidList.size(), false);
+
+  if(selectedFlags.size() != items.size()){
+    selectedFlags.clear();
+    selectedFlags.resize(items.size(),false);
   }
-  
   int selectedIdx = 0;
-  drawMenuWithCheckbox(ssidList, channelList, selectedAPs, selectedIdx);
-  
-  while(true) {
+  drawMenuWithCheckbox(items,channels,selectedFlags,selectedIdx);
+
+  unsigned long lastRedraw = millis();
+
+  while(true){
     if(btn.btnPress(btnUp)){
-      selectedIdx = (selectedIdx > 0) ? selectedIdx - 1 : (int)ssidList.size() - 1;
-      drawMenuWithCheckbox(ssidList, channelList, selectedAPs, selectedIdx);
+      selectedIdx = (selectedIdx > 0) ? selectedIdx - 1: (int)items.size() -1;
+      drawMenuWithCheckbox(items,channels,selectedFlags,selectedIdx);
     }
     if(btn.btnPress(btnDown)){
-      selectedIdx = (selectedIdx < (int)ssidList.size() - 1) ? selectedIdx + 1 : 0;
-      drawMenuWithCheckbox(ssidList, channelList, selectedAPs, selectedIdx);
+      selectedIdx = (selectedIdx < (int)items.size() - 1) ? selectedIdx + 1 : 0;
+      drawMenuWithCheckbox(items,channels,selectedFlags,selectedIdx);
     }
-    if(btn.btnPress(btnOk)){
-      if(selectedIdx < (int)selectedAPs.size()) {
-        selectedAPs[selectedIdx] = ! selectedAPs[selectedIdx];
-        drawMenuWithCheckbox(ssidList, channelList, selectedAPs, selectedIdx);
+    if (btn.btnPress(btnOk)){
+      if(selectedIdx < (int)selectedFlags.size()) {
+        selectedFlags[selectedIdx] =! selectedFlags[selectedIdx];
+        drawMenuWithCheckbox(items,channels,selectedFlags,selectedIdx);
       }
     }
     if(btn.btnPress(btnBack)) break;
+    if(millis() - lastRedraw > 16){
+      updateScrollState(selectedIdx);
+      if(isScrolling) drawMenuWithCheckbox(items,channels,selectedFlags,selectedIdx);
+      lastRedraw = millis();
+    }
   }
+}
+
+void nx::menu::drawSelectMenu() {
+  if(channelAPMap.empty()){
+    renderPopup("ScanFirst");
+    popupFlag = true;
+    return;
+  }
+  std::vector<std::string> ssidList;
+  std::vector<std::string> channelList;
+
+  getSSIDAndChannelLists(ssidList,channelList);
+  executeSelectMenu(ssidList,channelList,selectedAPs,"No APs Found");
 }
 
 void nx::menu::deauthSelected() {
@@ -1045,6 +1207,21 @@ void nx::menu::scanWiFi(){
     tx.performProgressiveScan();
     if(btn.btnPress(btnBack)) break;
   }
+}
+
+void nx::menu::scanSTA(){
+  if(channelAPMap.empty()){
+    renderPopup("Scan APs first");
+    return;
+  }
+  tx.startSTAScan();
+  tx.staScanComplete = false;
+  while(!tx.staScanComplete){
+    drawSubMenu("STA scan",false,true);
+    tx.performProgressiveSTAScan();
+    if(btn.btnPress(btnBack))break;
+  }
+  tx.stopSTAScan();
 }
 
 void nx::menu::drawAbout(){

@@ -16,7 +16,6 @@
 // packet monitor
 #define PACKET_BAR_INTERVAL 100 // 100 ms -> 10FPS
 
-
 struct menuItem {
   std::string name;
   std::function<void()> action;
@@ -35,8 +34,13 @@ namespace nx {
     static constexpr uint8_t channels5G[] = {36, 40, 44, 48, 149, 153, 157, 161, 165};
         
     static constexpr const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
-    static constexpr const char* info[] = {"v1.2.0-beta", "ESP32-C5", "warwick320"};
+    static constexpr const char* info[] = {"v1.3.0-beta", "ESP32-C5", "warwick320"};
     static constexpr int yOffsetTyping[] = {30, 40, 50}; 
+
+    static constexpr const int SCROLL_DELAY = 1500;
+    static constexpr const int SCROLL_DURATION = 1000;
+    static constexpr const uint8_t MAX_STR_DISPLAY_LEN = 10;
+    
 
     std::string lastTitle = "";
     bool fadeFlag = false;
@@ -70,8 +74,6 @@ namespace nx {
     static constexpr unsigned long animDuration = 300UL;
     static constexpr unsigned long lineAnimDuration = 250UL;
     static constexpr unsigned long lineDelay = 80UL;
-
-    static constexpr unsigned long borderAnimDuration = 250UL;
     
     static constexpr int checkboxX = baseX + 2;
     static constexpr int checkboxSize = 8;
@@ -85,6 +87,12 @@ namespace nx {
     int startY = 41;
     int progress = 0;
     int arcHeight = 20;
+
+    unsigned long lastSelectionTime = 0;
+    bool isScrolling = false;
+    int scrollOffset = 0;
+    int lastScrollIndex = -1;
+    
     
     nx::buttons btn;
     nx::wifi tx;
@@ -106,7 +114,7 @@ namespace nx {
     
     void renderRoundRect(int x, int y, int w, int h);
     void renderCheckbox(int x, int y, bool checked);
-    void renderLineWithCheckbox(const std::string &ssid, const std::string &channel, int y, bool checked, bool selected);
+    void renderLineWithCheckbox(const std::string &ssid, const std::string &channel, int y, bool checked, bool selected,int itemIndex = -1);
     void renderSingleLine(const std::string &text, int y, bool drawRect);
     void renderText(const std::vector<std::string> &items, int start, int y, int count);
     void renderPopup(const std::string& ctx);
@@ -140,17 +148,29 @@ namespace nx {
     void executeChannelAttack(const char* attackType, std::function<void(uint8_t)> attackFunc);
     void executeSelectedAttack(const char* attackType, std::function<void(const BSSIDInfo&, uint8_t)> attackFunc);
     void executeBeaconAttack(const std::vector<const BSSIDInfo*>& apList, const std::string& title);
+    void executeSelectMenu(std::vector<std::string>& items,std::vector<std::string>& channels,std::vector<bool>& selectedFlags,const std::string& emptyMessage);
+
+    void getSTALists(std::vector<std::string> &macs,std::vector<std::string> &channels);
+  
+    //Scroll 
+    std::string getDisplaySSID(const std::string& ssid,int idx,bool isSelected);
+    void updateScrollState(int selectedIdx);
+
   public:
     int index = 0;
     std::vector<bool> selectedAPs;
+    std::vector<bool> selectedSTAs;
     // Start Animation
     void startAnimation();
     // Core
     void init();
-    void scanWiFi();
     void drawSubMenu(const std::string& title, bool progressFlag = true, bool scanFlag = false);
     void drawMenu(const std::vector<std::string> &items, int index);
     void menuHandler(std::vector<menuItem> &menu, int index);
+
+    // Scan
+    void scanWiFi();
+    void scanSTA();
 
     // ==== Attack ====
 
@@ -175,7 +195,10 @@ namespace nx {
     void assocAttack();
     void assocByChannel();
     void assocSelected();
-    
+    // Deauth By STA
+    void attackSelectedBySTAs();
+    //void attackSelectedBySTAsByChannel();
+
     // ================
 
     // PacketMonitor
@@ -184,6 +207,7 @@ namespace nx {
     // Settings
     void drawSelectMenu();
     void drawMenuWithCheckbox(const std::vector<std::string> &ssids, const std::vector<std::string> &channels, const std::vector<bool> &checked, int index);
+    void drawSelectMenuSTA();
     // About
     void drawAbout();
   };

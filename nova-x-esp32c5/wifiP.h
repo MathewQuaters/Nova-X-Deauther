@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <array>
-
+#include <map>
 #define STORE_LEN 64
 #define PER_PKT 10
 
@@ -24,6 +24,31 @@ struct BSSIDInfo {
     return bssid == other.bssid;
   }
 };
+
+struct STAInfo{
+  std::array<uint8_t,6> staMac;
+  std::array<uint8_t,6> apMac;
+  unsigned long lastSeen;
+  uint32_t packetCount;
+
+  STAInfo(const uint8_t* sta,const uint8_t* ap) : lastSeen(millis()) , packetCount(1){
+    memcpy(staMac.data(),sta,6);
+    memcpy(apMac.data(),ap,6);
+  }
+  bool operator==(const STAInfo& other) const {
+    return staMac == other.staMac;
+  }
+  void update(){
+    lastSeen = millis();
+    packetCount++;
+  }
+};
+
+extern std::map<uint8_t,std::vector<STAInfo>> channelSTAMap;
+extern uint16_t totalSTACount; 
+
+void addOrUpdateSTA(const uint8_t* staMac,const uint8_t* apMac , uint8_t channel);
+int findSTA(const uint8_t* mac);
 
 // packet
 extern bool packetMonitorActive;
@@ -76,7 +101,13 @@ namespace nx {
     unsigned long lastScan = 0;
     unsigned long scanInterval = 300;
     bool scanComplete = false;
-    
+
+    size_t staChannelIndex = 0;
+    unsigned long lastSTAScan = 0;
+    unsigned long staScanInterval = 1500;
+    bool staScanComplete = false;
+    bool staScanActive = false;
+
     void init();
     void debug_print(const char* context);
     
@@ -134,6 +165,24 @@ namespace nx {
     uint16_t getMaxPacket();
     double getScaleFactor(uint8_t height);
 
+    //STA
+    void clearSTAMap();
+    uint8_t getSTACount();
+    std::vector<STAInfo> getSTAsByChannel(uint8_t channel);
+    std::vector<STAInfo> getSTAsByAP(const uint8_t* apMac);
+
+    //STA scan
+    void startSTAScan();
+    void stopSTAScan();
+    void performProgressiveSTAScan();
+    int scanSTAOnChannel(uint8_t channel);
+    // STA Targeted Deauth
+    void txDeauthFrameSTA(const uint8_t* staMac,const uint8_t* apMac,uint8_t channel);
+    // should i implement?
+    void txDeauthFrameAllSTAs();
+    void txDeauthFrameSTAsByChannel(uint8_t channel);
+
+    //void printAllSTAs();
   };
 
 }
