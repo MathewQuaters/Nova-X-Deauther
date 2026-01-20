@@ -10,7 +10,7 @@
 ![ESP32](https://img.shields.io/badge/ESP32-2C2D72?logo=espressif&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
 ![License:  BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange)
-![Version](https://img.shields.io/badge/version-1.3.0--beta-blue)
+![Version](https://img.shields.io/badge/version-1.4.0--beta-blue)
 ![GitHub stars](https://img.shields.io/github/stars/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/warwick320/Nova-X-5G-Deauther?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/warwick320/Nova-X-5G-Deauther)
@@ -65,6 +65,15 @@ WiFi security testing and BLE advertisement tool specifically designed for ESP32
 - Random SSID generation
 - Channel-specific beacon flooding
 - Custom Prefix beacon flooding
+
+**AP Spoofing**
+- Multi-channel beacon frame flooding
+- Cloned SSID/BSSID propagation
+- Probe response injection
+- Periodic deauthentication (10s interval)
+
+> Clones AP credentials (SSID/BSSID) and broadcasts beacons on all channels, making it impossible for clients to locate the real access point. 
+
 
 **Packet Monitor**
 - Automatic channel hopping across 2.4Ghz ~ 5Ghz
@@ -276,6 +285,9 @@ Nova-X ESP32C5
 |   |   ├── Channel
 │   │   └── Prefix
 │   │
+│   ├── AP Spoofing
+│   │   └── Selected
+│   │
 │   └── B. T Adv
 │       ├── Samsung
 │       └── IOS
@@ -330,6 +342,17 @@ Fixed Parameters:
   - Beacon Interval:  0xE8 0x03
   - Capability Info:  0x21 0x00
 Tagged Parameters: SSID, Rates, Channel
+```
+
+**Probe Response Frame**
+```cpp
+Frame Control:     0x50 0x00
+Fixed Parameters:
+  - Timestamp
+  - Beacon Interval:  0xE8 0x03
+  - Capability Info:  0x21 0x00
+Tagged Parameters: SSID, Rates, Channel
+Destination:        Client MAC
 ```
 
 ### Channel Configuration
