@@ -698,6 +698,51 @@ void nx::wifi::txAssocFlood(){
   }
 }
 
+void nx::wifi::txProbeResponse(const uint8_t* bssid,const char* ssid,uint8_t channel,const uint8_t* destMac){
+ if(bssid == nullptr || destMac == nullptr) return;
+
+  uint8_t ssidLen = strlen(ssid);
+  if (ssidLen > 32) ssidLen = 32;
+
+  static const uint8_t probeRespTemplate[38] PROGMEM = {
+    0x50,0x00,
+    0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,
+    0xE8,0x03,
+    0x11,0x04
+  };
+
+  uint8_t pkt[128];
+
+  memcpy_P(pkt,probeRespTemplate,38);
+
+  memcpy(&pkt[4] , destMac,6);
+  memcpy(&pkt[10], bssid,6);
+  memcpy(&pkt[16], bssid,6);
+
+  int idx = 38;
+  static const uint8_t rates[10] PROGMEM = {
+    0x01,0x08,0x82,0x8B,0x96,0x0c,0x12,0x18,0x24
+  };
+
+  pkt[idx++] = 0x00;
+  pkt[idx++] = ssidLen;
+  memcpy(&pkt[idx],ssid,ssidLen);
+  idx += ssidLen;
+
+  memcpy_P(&pkt[idx], rates,10);
+  idx += 10;
+  pkt[idx++] = 0x03;
+  pkt[idx++] = 0x01;
+  pkt[idx++] = channel;
+
+  setBandChannel(channel);
+  for(uint8_t i = 0; i < PER_PKT; i++) esp_wifi_80211_tx(WIFI_IF_STA,pkt,idx,false);
+}
+
 void nx::wifi::init(){
   WiFi.mode(WIFI_MODE_NULL);
   delay(100);

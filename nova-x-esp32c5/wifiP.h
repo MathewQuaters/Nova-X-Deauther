@@ -148,6 +148,9 @@ namespace nx {
     void txAssocFrame(const uint8_t* bssid, const char* ssid, uint8_t channel);
     void txAssocFlood();
 
+    // Probe Response
+    void txProbeResponse(const uint8_t* bssid,const char* ssid,uint8_t channel,const uint8_t* destMac);
+
     // Packet monitor
     void startPacketMonitor();
     void stopPacketMonitor();

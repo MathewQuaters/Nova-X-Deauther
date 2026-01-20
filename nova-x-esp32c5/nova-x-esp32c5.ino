@@ -32,6 +32,9 @@ std:: vector<menuItem> mainMenu = {
       menuItem("Channel",[](){m.beaconDupeByChannel();},{}),
       menuItem("Prefix",[](){m.beaconCustomPrefix(prefix);},{})
     }),
+    menuItem("AP Spoofing", nullptr, {
+      menuItem("Selected",[](){m.APSpoofing();},{})
+    }),
     menuItem("B.T Adv",nullptr,{
       menuItem("Samsung",[](){m.drawSamsungAdv();},{}),
       menuItem("IOS",[](){m.drawIosAdv();},{})
