@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-Original repository cand be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
+Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
 WiFi security testing and BLE advertisement tool specifically designed for ESP32C5 platform with U8g2 OLED display support.
 
