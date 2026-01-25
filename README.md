@@ -1,21 +1,12 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/warwick320/Nova-X-5G-Deauther"><img src="https://github.com/warwick320/Nova-X-5G-Deauther/blob/main/img/logo.png" alt="Nova-X" width="200"></a>
+  <a href="https://github.com/MathewQuaters/Nova-X-5G-Deauther"><img src="https://github.com/MathewQuaters/Nova-X-5G-Deauther/blob/main/img/logo.png" alt="Nova-X" width="200"></a>
   <br>
   Nova-X
   <br>
 </h1>
 
-![C++](https://img.shields.io/badge/C%2B%2B-00599C?logo=c%2B%2B&logoColor=white)
-![ESP32](https://img.shields.io/badge/ESP32-2C2D72?logo=espressif&logoColor=white)
-![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
-![License:  BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange)
-![Version](https://img.shields.io/badge/version-1.4.0--beta-blue)
-![GitHub stars](https://img.shields.io/github/stars/warwick320/Nova-X-5G-Deauther?style=social)
-![GitHub forks](https://img.shields.io/github/forks/warwick320/Nova-X-5G-Deauther?style=social)
-![GitHub issues](https://img.shields.io/github/issues/warwick320/Nova-X-5G-Deauther)
-![GitHub last commit](https://img.shields.io/github/last-commit/warwick320/Nova-X-5G-Deauther)
-
+Original repository cand be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 WiFi security testing and BLE advertisement tool specifically designed for ESP32C5 platform with U8g2 OLED display support.
 
 > The current version is in beta. More features will be added.
