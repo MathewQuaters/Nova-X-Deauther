@@ -14,62 +14,61 @@ WiFi security testing and BLE advertisement tool specifically designed for ESP32
 
 ## Table of Contents
 
-- [Contact & Troubleshooting](#contact--troubleshooting)
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Pin Configuration](#pin-configuration)
-- [Software Requirements](#software-requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Menu System](#menu-system)
-- [Technical Details](#technical-details)
-- [Legal Disclaimer](#legal-disclaimer)
-- [License](#license)
+- [Liên hệ & Khắc phục sự cố](#lien-he--khac-phuc-su-co)
+- [Tính Năng](#tinh-nang)
+- [Yêu cầu phần cứng](#yeu-cau-phan-cung)
+- [Cấu hình các chân IO](#cau-hinh-cac-chan-io)
+- [Yêu cầu phần mềm](#yeu-cau-phan-mem)
+- [Cài đặt](#cai-dat)
+- [Cách sử dụng](#cach-su-dung)
+- [Hệ thống Menu](#he-thong-menu)
+- [Chi tiết kỹ thuật](#chi-tiet-ky-thuat)
+- [Tuyên bố miễn trừ trách nhiệm pháp lý](#tuyen-bo-mien-tru-trach-nhiem-phap-ly)
+- [Giấy phép](#license)
 
-## Contact & Troubleshooting
+## Liên hệ & Khắc phục sự cố
 
-- **Issues && Troubleshooting**: [Discord Server Link](https://discord.gg/gvzkwguAkh)
+- **Vấn đề && Khắc phục sự cố**: [Máy chủ Discord Nova-X](https://discord.gg/gvzkwguAkh)
 
 
-## Features
+## Tính năng
 
-### WiFi Security Testing
+### Kiểm tra bảo mật WiFi 
+**Tấn công hủy xác thực**
+- Chế độ Tất Cả Điểm Truy Cập
+- Nhắm vào kênh cụ thể
+- Nhắm vào điểm truy cập cụ thể
+- Nhắm vào STA cụ thể
 
-**Deauthentication Attacks**
-- All Access Points mode
-- Channel-specific targeting
-- Selected AP targeting
-- Selected STA targeting
+**Tràn Xác thực**
+- Truyền phát khung xác thực hàng loạt
+- Tấn công xác thực theo kênh
+- Tấn công xác thực có chọn lọc
 
-**Authentication Flooding**
-- Mass authentication frame transmission
-- Channel-based authentication attacks
-- Selective AP authentication flooding
+**Tràn ASC**
+- Tấn công tràn bằng yêu cầu ASC
+- Tấn công ASC theo kênh
+- Chèn khung ASC theo mục tiêu
 
-**Association Flooding**
-- Association request flood attacks
-- Channel-specific association attacks
-- Targeted association frame injection
-
-**Beacon Frame Manipulation**
-- All SSID duplication
-- Selected SSID cloning
-- Random SSID generation
-- Channel-specific beacon flooding
-- Custom Prefix beacon flooding
+**Thao tác khung tín hiệu**
+- Nhân bản tất cả SSID
+- Nhân bản SSID đã chọn
+- Tạo SSID ngẫu nhiên
+- Tràn Khung tín hiệu theo kênh
+- Tùy chỉnh Tràn tiền tố khung tín hiệu
 
 **AP Spoofing**
-- Multi-channel beacon frame flooding
-- Cloned SSID/BSSID propagation
-- Probe response injection
-- Periodic deauthentication (10s interval)
+- Tràn khung tín hiệu đa kênh
+- Lan truyền SSID được nhân bản
+- Chèn phản hồi probe
+- Hủy xác thực định kì (trong 10s)
 
-> Clones AP credentials (SSID/BSSID) and broadcasts beacons on all channels, making it impossible for clients to locate the real access point. 
+> Nhân bản thông tin điểm truy cập (SSID/BSSID) và phát tín hiệu trên tất cả các kênh, khiến các máy khách không thể xác định điểm truy cập thực. 
 
 
-**Packet Monitor**
-- Automatic channel hopping across 2.4Ghz ~ 5Ghz
-- Packet rate visualization using line graph
+**Theo dõi gói tin**
+- Tựu động chuyển kênh giữa 2 băng tần 2.4Ghz ~ 5Ghz
+- Tỉ lệ truyền tải gói dữ liệu bằng biểu đồ
 
 
 ### BLE Advertisement Spoofing
@@ -77,34 +76,32 @@ WiFi security testing and BLE advertisement tool specifically designed for ESP32
 - iOS device emulation support
 - Samsung device emulation support
 
-### User Interface
+### Giao diện
 
-- SSD1306 OLED display (128x64)
-- 4-button tactile navigation system
+- Màn hình OLED SSD1306 (128x64)
+- Hệ thống điều hướng 4 nút
 
-### Network Scanning
+### Quét mạng
 
-**Dual-Band WiFi Support**
-- 2.4GHz:  Channels 1-14
-- 5GHz:  Channels 36-165
-- Progressive scanning algorithm
-- RSSI measurement
-- Channel mapping
-- Encryption detection
+**Hỗ trợ WiFi băng tần kép**
+- 2.4GHz:  Kênh 1-14
+- 5GHz:  Kênh 36-165
+- Thuật toán quét liên tục
+- Đo lường RSSI
+- Lập bản đồ kênh
+- Phát hiện mã hóa
+## Yêu cầu phần cứng
 
-## Hardware Requirements
+### Vi điều khiển
+- Mô-đun ESP32C5
 
-### Microcontroller
-- ESP32C5 module
+### Màn hình
+- SSD1306 OLED (Độ phân giải 128x64)
+- Giao tiếp I2C
 
-### Display
-- SSD1306 OLED (128x64 pixels)
-- I2C interface
-
-### Buttons
-- 4x Tactile push buttons
-
-## Pin Configuration
+### Nút bấm
+- 4 nút nhấn nhả
+## Cấu hình các chân IO
 
 ```cpp
 // I2C Display Pins
@@ -121,7 +118,7 @@ BTN_BACK = GPIO 10
 OLED_RESET = -1 (not used)
 ```
 
-### Wiring Diagram
+### Sơ đồ nối dây
 
 ```
 ESP32C5          SSD1306 OLED
@@ -130,25 +127,25 @@ GPIO 25  ------>  SCL
 3.3V     ------>  VCC
 GND      ------>  GND
 
-ESP32C5          Buttons
-GPIO 24  ------>  UP Button    ----> GND
-GPIO 23  ------>  DOWN Button  ----> GND
-GPIO 28  ------>  OK Button    ----> GND
-GPIO 10  ------>  BACK Button  ----> GND
+ESP32C5            Nút bấm
+GPIO 24  ------>  Nút LÊN       ----> GND
+GPIO 23  ------>  Nút XUỐNG     ----> GND
+GPIO 28  ------>  Nút OK        ----> GND
+GPIO 10  ------>  Nút QUAY LẠI  ----> GND
 ```
 
-## Software Requirements
+## Yêu cầu phần mềm
 
-### Required Libraries
+### Yêu cầu thư viện
 
 ```cpp
-// Core Libraries
-- U8g2lib              // OLED display driver
-- NimBLE-Arduino       // Bluetooth Low Energy
-- WiFi                 // ESP32 WiFi library
-- esp_wifi             // Low-level WiFi functions
+// Các thư viện lõi
+- U8g2lib              // Driver màn hình OLED
+- NimBLE-Arduino       // Bluetooth LE
+- WiFi                 // Thư viện WiFi ESP32
+- esp_wifi             // Chức năng WiFi cấp thấp
 
-// Standard Libraries
+// Thư viện tiêu chuẩn
 - Arduino.h
 - Wire.h (I2C)
 - vector (STL)
@@ -156,96 +153,93 @@ GPIO 10  ------>  BACK Button  ----> GND
 - map (STL)
 ```
 
-### Library Installation
+### Cài đặt thư viện
 
-**Method 1: Arduino Library Manager**
+**Cách 1: Qua Arduino Library Manager**
 ```
 Tools > Manage Libraries
 Search:  "U8g2"        Install:  U8g2 by oliver
 Search: "NimBLE"      Install: NimBLE-Arduino by h2zero
 ```
 
-**Method 2: Manual Installation**
+**Cách 2: Cài Đặt Thủ Công**
 ```bash
 cd ~/Arduino/libraries/
 git clone https://github.com/olikraus/u8g2.git
 git clone https://github.com/h2zero/NimBLE-Arduino.git
 ```
 
-## Installation
+## Cài đặt
 
-### Step 1: Board Setup (If you need to modify the sketch)
+### Bước 1: Thiết Lập Mạch (Nếu bạn thay đổi sketch)
 
-1. Open Arduino IDE
-2. Go to `File > Preferences`
-3. Add ESP32 board URL to Additional Board Manager URLs: 
+1. Mở Arduino IDE
+2. Đi tới `File > Preferences`
+3. Thêm URL mạch ESP32 vào Additional Board Manager URLs: 
 ```
 https://espressif.github.io/arduino-esp32/package_esp32_index.json
 ```
-4. Open `Tools > Board > Board Manager`
-5. Search "esp32" and install "esp32 by Espressif Systems"
-6. Select `Tools > Board > ESP32 Arduino > ESP32C5 Dev Module`
+4. Mở `Tools > Board > Board Manager`
+5. Tìm "esp32" và cài đặt "esp32 by Espressif Systems"
+6. Chọn `Tools > Board > ESP32 Arduino > ESP32C5 Dev Module`
 
-### Step 2: Upload Sketch
+### Bước 2: Tải Lên Sketch
 
-> Recommended method is the first method
+### Cách 1 - Tải Lên Bằng Image Uploader (Khuyến Khích)
 
-### Method 1 (Upload via Image Uploader)
+1. Tải Image Uploader mới nhất từ [trang phát hành của wardwick](https://github.com/warwick320/Nova-X-5G-Deauther/releases/tag/image_uploader)
+2. Mở Image Uploader
+3. Chọn cổng COM đã kết nối với ESP32C5
+4. Nhấn Upload
 
-1. Download the latest image uploader from [the Release page](https://github.com/warwick320/Nova-X-5G-Deauther/releases/tag/image_uploader)
-2. Open image uploader
-3. Select the COM port to which the ESP32-C5 is connected
-4. Click Upload
+### Cách 2 - Tải Lên Qua Sketch
 
-### Method 2 (Upload via Sketch)
+> Trước khi bạn tải lên, bạn cần phải vá bộ soạn ESP32 - [Bộ vá](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - Ví dụ: [platform.txt](https://github.com/7h30th3r0n3/Evil-M5Project/blob/main/utilities/deauth_prerequisites/plateform.txt)
 
-> Before upload sketch you need to patch your esp32 compiler - [patcher](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - ex) [platform.txt](https://github.com/7h30th3r0n3/Evil-M5Project/blob/main/utilities/deauth_prerequisites/plateform.txt)
-
-1. Open `nova-x-esp32c5/nova-x-esp32c5.ino`
-2. Configure board settings:
+1. Mở `nova-x-esp32c5/nova-x-esp32c5.ino`
+2. Cài đặt các thông số mạch:
    - Board: ESP32C5 Dev Module
    - Upload Speed: 115200
    - Flash Frequency:  80MHz
    - Flash Mode: QIO
    - Partition Scheme:  Huge APP (3MB No OTA/1MB SPIFFS)
-3. Select correct COM port
-4. Click Upload
+3. Chọn đúng cổng COM
+4. Nhấn Upload
 
-### Step 3: Serial Monitor
-
+### Bước 3: Theo Dõi Nhật Ký Serial
 ```
 Tools > Serial Monitor
 Baud Rate: 115200
 ```
 
 
-## Usage
+## Cách sử dụng
 
-### Navigation
+### Điều Hướng
 
-- **UP Button**: Move selection up
-- **DOWN Button**: Move selection down
-- **OK Button**:  Confirm selection / Start action
-- **BACK Button**: Return to previous menu / Stop action
+- **Nút UP**: Đưa vùng chọn lên trên
+- **Nút DOWN**: Đưa vùng chọn xuống dưới
+- **Nút OK**:  Xác nhận lựa chọn / Bắt đầu hành động
+- **Nút BACK**: Quay lại menu trước đó / Dừng hành động
 
-### Basic Workflow
+### Workflow Cơ Bản
 
-**1. Scanning Networks**
+**1. Quét mạng**
 ```
 Main Menu > Scan
 ```
 
-**2. Selecting Targets**
+**2. Chọn mục tiêu**
 ```
 Main Menu > Settings > Select APs
 ```
 
-**3. Running Attacks**
+**3. Thực hiện tấn công**
 ```
 Main Menu > Exploit > [Attack Type] > [Mode]
 ```
 
-## Menu System
+## Hệ thống Menu
 
 ```
 Nova-X ESP32C5
@@ -295,11 +289,11 @@ Nova-X ESP32C5
 └── About
 ```
 
-## Technical Details
+## Thông tin kĩ thuật
 
-### WiFi Frame Structures
+### Cấu trúc khung WiFi
 
-**Deauthentication Frame (26 bytes)**
+**Khung Hủy xác thực (26 bytes)**
 ```cpp
 Frame Control:     0xC0 0x00
 Duration:          0x3A 0x01
@@ -310,7 +304,7 @@ Sequence:          0x00 0x00
 Reason Code:       0x07 0x00
 ```
 
-**Authentication Frame**
+**Khung xác thực**
 ```cpp
 Frame Control:     0xB0 0x00
 Algorithm:         0x00 0x00 (Open System)
@@ -318,7 +312,7 @@ Sequence Number:   0x01 0x00
 Status Code:       0x00 0x00
 ```
 
-**Association Request Frame**
+**Khung Yêu cầu ASC**
 ```cpp
 Frame Control:     0x00 0x00
 Capability Info:   0x21 0x04
@@ -326,7 +320,7 @@ Listen Interval:   0x0A 0x00
 Tagged Parameters:  SSID, Supported Rates
 ```
 
-**Beacon Frame**
+**Khung tín hiệu**
 ```cpp
 Frame Control:     0x80 0x00
 Fixed Parameters: 
@@ -336,7 +330,7 @@ Fixed Parameters:
 Tagged Parameters: SSID, Rates, Channel
 ```
 
-**Probe Response Frame**
+**Khung Phản hồi Probe**
 ```cpp
 Frame Control:     0x50 0x00
 Fixed Parameters:
@@ -347,14 +341,14 @@ Tagged Parameters: SSID, Rates, Channel
 Destination:        Client MAC
 ```
 
-### Channel Configuration
+### Cấu hình kênh
 
-**2.4GHz Band (14 channels)**
+**Băng tần 2.4GHz (14 kênh)**
 ```cpp
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 ```
 
-**5GHz Band (23 channels)**
+**Băng tần 5GHz (23 kênh)**
 ```cpp
 36, 40, 44, 48, 52, 56, 60, 64,
 100, 104, 108, 112, 116, 124, 128,
@@ -362,11 +356,11 @@ Destination:        Client MAC
 149, 153, 157, 161, 165
 ```
 
-**Total: 37 channels**
+**Tổng: 37 kênh**
 
-### BLE Advertisement Data
+### Dữ liệu Quảng cáo BLE
 
-**iOS Device Structure (31 bytes)**
+**Cấu trúc thiết bị iOS (31 bytes)**
 ```cpp
 Size:          0x1e
 Type:         0xFF (Manufacturer Specific)
@@ -375,7 +369,7 @@ Subtype:      0x07 0x19
 Device Type:  [varies by device]
 ```
 
-**Samsung Device Structure (15 bytes)**
+**Cấu trúc thiết bị Samsung (15 bytes)**
 ```cpp
 Size:         0x0E
 Type:         0xFF (Manufacturer Specific)
@@ -384,45 +378,45 @@ Subtype:      0x01
 Model:        [device-specific byte]
 ```
 
-## Legal Disclaimer
+## Tuyên bố miễn trừ trách nhiệm pháp lý
 
-**IMPORTANT: READ BEFORE USE**
+**QUAN TRỌNG: ĐỌC TRƯỚC KHI DÙNG**
 
-This tool is designed exclusively for: 
-- Authorized penetration testing
-- Educational purposes in controlled environments
-- Network administration on owned infrastructure
-- Security research with proper authorization
+Công cụ này được thiết kế dành riêng cho: 
+- Kiểm thử xâm nhập được ủy quyền
+- Mục đích giáo dục trong môi trường được kiểm soát
+- Quản trị mạng trên cơ sở hạ tầng thuộc sở hữu
+- Nghiên cứu an ninh với sự ủy quyền thích hợp
 
-**Legal Warnings**
+**Cảnh báo pháp lý**
 
-Unauthorized use of this software may violate laws including: 
+Việc sử dụng phần mềm này trái phép có thể vi phạm pháp luật, bao gồm nhưng không giới hạn ở: 
 
-- **United States**: Computer Fraud and Abuse Act (CFAA), Federal Communications Act
-- **European Union**: GDPR, Computer Misuse Act, national telecommunications laws
-- **International**: Local wireless communication regulations and computer crime statutes
+- **Hợp Chủng Quốc Hoa Kỳ**: "Computer Fraud and Abuse Act (CFAA), Federal Communications Act" - Đạo luật chống gian lận và lạm dụng máy tính, Đạo luật truyền thông liên bang
+- **Liên minh Châu Âu**: "GDPR, Computer Misuse Act, national telecommunications laws" - GDPR, Đạo luật chống lạm dụng máy tính, luật viễn thông quốc gia
+- **Quốc Tế**: "Local wireless communication regulations and computer crime statutes" - Các quy định về truyền thông không dây trong nước và luật về tội phạm máy tính
 
 WiFi deauthentication, association flooding, and unauthorized network interference are **illegal activities** in most jurisdictions without explicit written permission from network owners.
 
-**Penalties may include**:
-- Criminal prosecution
-- Civil liability
-- Significant fines
-- Imprisonment
+**Các hình phạt có thể cao gồm:**:
+- Truy tố hình sự
+- Trách nhiệm dân sự
+- Mức phạt đáng kể
+- Giam giữ
 
-**User Responsibility**
+**Trách nhiệm của người sử dụng**
 
-By using this software, you acknowledge: 
-1. You have explicit written authorization to test target networks
-2. You understand applicable laws in your jurisdiction
-3. You accept full legal responsibility for your actions
-4. The authors bear no liability for misuse or legal consequences
+Bằng việc sử dụng phần mềm này, bạn đã hiểu và xác nhận: 
+1. Bạn có giấy ủy quyền bằng văn bản rõ ràng để kiểm tra các mục tiêu mạng
+2. Bạn hiểu rõ các luật hiện hành tại vùng/quốc gia sở tại
+3. Bạn chấp nhận toàn bộ tách nhiệm pháp lý đối với của nhành động của bản thân.
+4. Tác giả (Tức Tôi - Mathew Quaters ; hay tác giả gốc - warwick320) **HOÀN TOÀN KHÔNG CHỊU TRÁCH NHIỆM PHÁP LÝ** đối với việc sử dụng sai mục đích dẫn đến hậu quả pháp lý.
 
-**Use this tool only on networks you own or have explicit written permission to test.**
+**CHỈ SỬ DỤNG TRÊN MẠNG CỦA BẠN HOẶC MẠNG ĐÃ ĐƯỢC CẤP QUYỀN BẰNG VĂN BẢN.**
 
-## License
+## Giấy phép
 
-This project is licensed under the **BSD 2-Clause "Simplified" License**.
+Dự án này được cấp phép theo **Giấy phép 2 điều BSD "Rút Gọn"**.
 
 ```
 Copyright (c) 2024, warwick320
@@ -451,9 +445,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-See the [LICENSE](../LICENSE) file for full details.
+Xem tệp [LICENSE](../LICENSE) để biết toàn bộ chi tiết.
 
 
 ---
 
-*Remember: With great power comes great responsibility. Use this tool ethically and legally.*
+*Hãy nhớ rằng: Quyền lực càng lớn, trách nhiệm càng nặng. Sử dụng công cụ này một cách có đạo đức và hợp pháp. -warwick320-*
