@@ -445,7 +445,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-Xem tệp [LICENSE](../LICENSE) để biết toàn bộ chi tiết.
+Xem tệp [LICENSE](https://github.com/MathewQuaters/Nova-X-Deauther/blob/main/LICENSE) để biết toàn bộ chi tiết.
 
 
 ---
