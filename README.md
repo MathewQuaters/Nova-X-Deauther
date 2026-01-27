@@ -10,6 +10,8 @@ Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-
 
 Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
 
+> Phần mềm đang trong thử nghiệm beta.
+
 ## Bảng nội dung
 
 - [Liên hệ & Khắc phục sự cố](#liên-hệ--khắc-phục-sự-cố)
@@ -26,7 +28,7 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 
 ## Liên hệ & Khắc phục sự cố
 
-- **Vấn đề && Khắc phục sự cố**: [Máy chủ Discord Nova-X](https://discord.gg/gvzkwguAkh)
+- **Vấn đề & Khắc phục sự cố**: [Máy chủ Discord Nova-X](https://discord.gg/gvzkwguAkh)
 
 
 ## Tính năng
