@@ -8,23 +8,21 @@
 
 Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
-WiFi security testing and BLE advertisement tool specifically designed for ESP32C5 platform with U8g2 OLED display support.
+Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
 
-> The current version is in beta. More features will be added.
+## Bảng nội dung
 
-## Table of Contents
-
-- [Liên hệ & Khắc phục sự cố](#lien-he--khac-phuc-su-co)
-- [Tính Năng](#tinh-nang)
-- [Yêu cầu phần cứng](#yeu-cau-phan-cung)
-- [Cấu hình các chân IO](#cau-hinh-cac-chan-io)
-- [Yêu cầu phần mềm](#yeu-cau-phan-mem)
-- [Cài đặt](#cai-dat)
-- [Cách sử dụng](#cach-su-dung)
-- [Hệ thống Menu](#he-thong-menu)
-- [Chi tiết kỹ thuật](#chi-tiet-ky-thuat)
-- [Tuyên bố miễn trừ trách nhiệm pháp lý](#tuyen-bo-mien-tru-trach-nhiem-phap-ly)
-- [Giấy phép](#license)
+- [Liên hệ & Khắc phục sự cố](#liên-hệ--khắc-phục-sự-cố)
+- [Tính Năng](#tính-năng)
+- [Yêu cầu phần cứng](#yêu-cầu-phần-cứng)
+- [Cấu hình các chân IO](#cấu-hình-các-chân-io)
+- [Yêu cầu phần mềm](#yêu-cầu-phần-mềm)
+- [Cài đặt](#cài-đặt)
+- [Cách sử dụng](#cách-sử-dụng)
+- [Hệ thống Menu](#hệ-thống-menu)
+- [Chi tiết kỹ thuật](#chi-tiết-kỹ-thuật)
+- [Tuyên bố miễn trừ trách nhiệm pháp lý](#tuyên-bố-miễn-trừ-trách-nhiệmm-pháp-lý)
+- [Giấy phép](#giấy-phép)
 
 ## Liên hệ & Khắc phục sự cố
 
