@@ -450,4 +450,4 @@ Xem tệp [LICENSE](../LICENSE) để biết toàn bộ chi tiết.
 
 ---
 
-*Hãy nhớ rằng: Quyền lực càng lớn, trách nhiệm càng nặng. Sử dụng công cụ này một cách có đạo đức và hợp pháp. -warwick320-*
+*Hãy nhớ rằng: Quyền lực càng lớn, trách nhiệm đè lên càng nặng. Sử dụng công cụ này một cách có đạo đức và hợp pháp. -warwick320-*
