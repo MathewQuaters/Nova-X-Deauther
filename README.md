@@ -73,8 +73,8 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 
 ### BLE Advertisement Spoofing
 
-- iOS device emulation support
-- Samsung device emulation support
+- Hỗ trợ giả lập thiết bị iOS
+- Hỗ trợ giả lập thiết bị Samsung
 
 ### Giao diện
 
