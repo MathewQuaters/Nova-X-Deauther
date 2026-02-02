@@ -4,47 +4,47 @@
 nx::menu m;
 
 std:: vector<menuItem> mainMenu = {
-  menuItem("Exploit",nullptr,{
-    menuItem("Deauth", nullptr, {
+  menuItem("Tấn Công",nullptr,{
+    menuItem("Hủy Xác Thực", nullptr, {
       menuItem("APs",nullptr,{
-        menuItem("All APs",[](){m.deauthAttack();},{}),
-        menuItem("Channel",[](){m.deauthByChannel();},{}),
-        menuItem("Selected",[](){m.deauthSelected();},{})
+        menuItem("Tất Cả AP",[](){m.deauthAttack();},{}),
+        menuItem("Kênh",[](){m.deauthByChannel();},{}),
+        menuItem("Đã chọn",[](){m.deauthSelected();},{})
       }),
-      menuItem("STAs",nullptr,{
-        menuItem("Selected",[](){m.attackSelectedBySTAs();},{})
+      menuItem("STA",nullptr,{
+        menuItem("Đã chọn",[](){m.attackSelectedBySTAs();},{})
       })
     }),
-    menuItem("Auth", nullptr, {
-      menuItem("All APs",[](){m.authAttack();},{}),
-      menuItem("Channel",[](){m.authByChannel();},{}),
-      menuItem("Selected",[](){m.authSelected();},{})
+    menuItem("Xác thực", nullptr, {
+      menuItem("Tất Cả AP",[](){m.authAttack();},{}),
+      menuItem("Kênh",[](){m.authByChannel();},{}),
+      menuItem("Đã chọn",[](){m.authSelected();},{})
     }),
-    menuItem("Assoc", nullptr, {
-      menuItem("All APs",[](){m.assocAttack();},{}),
-      menuItem("Channel",[](){m.assocByChannel();},{}),
-      menuItem("Selected",[](){m.assocSelected();},{})
+    menuItem("ASC", nullptr, {
+      menuItem("Tất Cả AP",[](){m.assocAttack();},{}),
+      menuItem("Kênh",[](){m.assocByChannel();},{}),
+      menuItem("Đã chọn",[](){m.assocSelected();},{})
     }),
     menuItem("Beacon", nullptr, {
-      menuItem("All SSIDs Dupe",[](){m.beaconAllSSID();},{}),    
-      menuItem("Selected Dupe",[](){m.beaconSSIDDupe();},{}),  
-      menuItem("Random",[](){m.beaconRandom();},{}),
-      menuItem("Channel",[](){m.beaconDupeByChannel();},{}),
-      menuItem("Prefix",[](){m.beaconCustomPrefix(prefix);},{})
+      menuItem("Nhân Bản SSID",[](){m.beaconAllSSID();},{}),    
+      menuItem("Nhân Bản Đã Chọn",[](){m.beaconSSIDDupe();},{}),  
+      menuItem("Ngẫu Nhiên",[](){m.beaconRandom();},{}),
+      menuItem("Kênh",[](){m.beaconDupeByChannel();},{}),
+      menuItem("Tiền Tố",[](){m.beaconCustomPrefix(prefix);},{})
     }),
     menuItem("AP Spoofing", nullptr, {
-      menuItem("Selected",[](){m.APSpoofing();},{})
+      menuItem("Đã chọn",[](){m.APSpoofing();},{})
     }),
-    menuItem("B.T Adv",nullptr,{
+    menuItem("Q.C. Bluetooth",nullptr,{
       menuItem("Samsung",[](){m.drawSamsungAdv();},{}),
       menuItem("IOS",[](){m.drawIosAdv();},{})
     })
   }),
-  menuItem("Scan",nullptr,{
-    menuItem("APs",[](){m.scanWiFi();},{}),
-    menuItem("STAs",[](){m.scanSTA();},{})
+  menuItem("Quét",nullptr,{
+    menuItem("Điểm Truy Cập",[](){m.scanWiFi();},{}),
+    menuItem("STA",[](){m.scanSTA();},{})
   }),
-  menuItem("Packet Monitor",[](){m.drawPacketMonitor();},{}),
+  menuItem("Theo Dõi Gói Tin",[](){m.drawPacketMonitor();},{}),
   menuItem("Settings",nullptr,{
     menuItem("Select APs",[](){m.drawSelectMenu();},{}),
     menuItem("Select STAs",[](){m.drawSelectMenuSTA();},{})
@@ -62,4 +62,5 @@ void setup(){
 
 void loop(){
   m.menuHandler(mainMenu,m.index);
+
 }
