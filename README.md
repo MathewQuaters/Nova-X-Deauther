@@ -401,8 +401,8 @@ WiFi deauthentication, association flooding, and unauthorized network interferen
 **Các hình phạt có thể bao gồm:**:
 - Truy tố trách nhiệm hình sự
 - Truy tố trách nhiệm dân sự
-- Mức phạt đáng kể
-- Giam giữ
+- Mức phạt nặng
+- Giam giữ / Phạt tù / Cải tạo không giam giữ
 
 **Trách nhiệm của người sử dụng**
 
