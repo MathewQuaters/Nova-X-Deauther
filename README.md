@@ -392,15 +392,15 @@ Công cụ này được thiết kế dành riêng cho:
 
 Việc sử dụng phần mềm này trái phép có thể vi phạm pháp luật, bao gồm nhưng không giới hạn ở: 
 
-- **Hợp Chủng Quốc Hoa Kỳ**: "Computer Fraud and Abuse Act (CFAA), Federal Communications Act" - Đạo luật chống gian lận và lạm dụng máy tính, Đạo luật truyền thông liên bang
-- **Liên minh Châu Âu**: "GDPR, Computer Misuse Act, national telecommunications laws" - GDPR, Đạo luật chống lạm dụng máy tính, luật viễn thông quốc gia
-- **Quốc Tế**: "Local wireless communication regulations and computer crime statutes" - Các quy định về truyền thông không dây trong nước và luật về tội phạm máy tính
+- **Hợp Chủng Quốc Hoa Kỳ**: `"Computer Fraud and Abuse Act (CFAA), Federal Communications Act"` - Đạo luật chống gian lận và lạm dụng máy tính, Đạo luật truyền thông liên bang
+- **Liên minh Châu Âu**: `"GDPR, Computer Misuse Act, national telecommunications laws"` - GDPR, Đạo luật chống lạm dụng máy tính, luật viễn thông quốc gia
+- **Quốc Tế**: `"Local wireless communication regulations and computer crime statutes"` - Các quy định về truyền thông không dây trong nước và luật về tội phạm máy tính
 
 WiFi deauthentication, association flooding, and unauthorized network interference are **illegal activities** in most jurisdictions without explicit written permission from network owners.
 
-**Các hình phạt có thể cao gồm:**:
-- Truy tố hình sự
-- Trách nhiệm dân sự
+**Các hình phạt có thể bao gồm:**:
+- Truy tố trách nhiệm hình sự
+- Truy tố trách nhiệm dân sự
 - Mức phạt đáng kể
 - Giam giữ
 
