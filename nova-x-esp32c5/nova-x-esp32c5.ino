@@ -45,16 +45,16 @@ std:: vector<menuItem> mainMenu = {
     menuItem("STA",[](){m.scanSTA();},{})
   }),
   menuItem("Theo Dõi Gói Tin",[](){m.drawPacketMonitor();},{}),
-  menuItem("Settings",nullptr,{
-    menuItem("Select APs",[](){m.drawSelectMenu();},{}),
-    menuItem("Select STAs",[](){m.drawSelectMenuSTA();},{})
+  menuItem("Cài Đặt",nullptr,{
+    menuItem("Chọn AP",[](){m.drawSelectMenu();},{}),
+    menuItem("Chọn STA",[](){m.drawSelectMenuSTA();},{})
   }),
-  menuItem("About",[](){m.drawAbout();},{}),
+  menuItem("Thông Tin",[](){m.drawAbout();},{}),
 };
 
 void setup(){
   Serial.begin(SERIAL_SPEED);
-  Serial.println("[SERIAL] Started");
+  Serial.println("[SERIAL] Đã khởi tạo.");
   Serial.println(F("=============================================================="));
   m.init();
   
@@ -64,3 +64,4 @@ void loop(){
   m.menuHandler(mainMenu,m.index);
 
 }
+
