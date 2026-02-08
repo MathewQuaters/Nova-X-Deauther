@@ -1,8 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/MathewQuaters/Nova-X-5G-Deauther"><img src="https://github.com/MathewQuaters/Nova-X-5G-Deauther/blob/main/img/logo.png" alt="Nova-X" width="200"></a>
-  <br>
-  Nova-X
+  <a href="https://github.com/MathewQuaters/Nova-X-Deauther"><img src="https://github.com/MathewQuaters/Nova-X-Deauther/blob/main/img/frontera-development.png" width="200"></a>
   <br>
 </h1>
 
@@ -396,7 +394,7 @@ Việc sử dụng phần mềm này trái phép có thể vi phạm pháp luậ
 - **Liên minh Châu Âu**: `"GDPR, Computer Misuse Act, national telecommunications laws"` - GDPR, Đạo luật chống lạm dụng máy tính, luật viễn thông quốc gia
 - **Quốc Tế**: `"Local wireless communication regulations and computer crime statutes"` - Các quy định về truyền thông không dây trong nước và luật về tội phạm máy tính
 
-WiFi deauthentication, association flooding, and unauthorized network interference are **illegal activities** in most jurisdictions without explicit written permission from network owners.
+Tấn công hũy xác thực WiFi, tràn ASC, và can thiệp mạng trái phép là **phạm pháp** ở hầu hết các khu vực pháp lý mà không có sự cho phép bằng văn bản rõ ràng từ chủ sở hữu mạng.
 
 **Các hình phạt có thể bao gồm:**:
 - Truy tố trách nhiệm hình sự
