@@ -147,7 +147,7 @@ GPIO 10  ------>  Nút QUAY LẠI  ----> GND
 - map (STL)
 ```
 
-Ngoài ra, bạn phải có cài bộ quản lý bảng mạch phát triển "esp32" từ Espressif ([mã nguồn](https://github.com/espressif/arduino-ep32), [hướng dẫn](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html))
+Ngoài ra, bạn phải có cài bộ quản lý bảng mạch phát triển "esp32" từ Espressif ([mã nguồn](https://github.com/espressif/arduino-esp32), [hướng dẫn](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html))
 
 *Trong trường hợp không thể cài do lỗi timeout, hãy tăng timeout limit lên 600s hoặc 1800s sử dụng git*
 
