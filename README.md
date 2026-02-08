@@ -2,7 +2,7 @@
 
 Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
-Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
+Công cụ kiểm thử bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
 
 > Phần mềm đang trong thử nghiệm beta.
 
@@ -51,7 +51,7 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 - Tràn Khung tín hiệu theo kênh
 - Tùy chỉnh Tràn tiền tố khung tín hiệu
 
-**AP Spoofing**
+**Giả mạo điểm truy cập**
 - Tràn khung tín hiệu đa kênh
 - Lan truyền SSID được nhân bản
 - Chèn phản hồi probe
@@ -65,7 +65,7 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 - Tỉ lệ truyền tải gói dữ liệu bằng biểu đồ
 
 
-### BLE Advertisement Spoofing
+### Giả mạo quảng cáo BLE
 
 - Hỗ trợ giả lập thiết bị iOS
 - Hỗ trợ giả lập thiết bị Samsung
@@ -84,7 +84,7 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 - Đo lường RSSI
 - Lập bản đồ kênh
 - Phát hiện mã hóa
-## Yêu cầu phần cứng
+## Yêu cầu phần cứng Giả mạo quảng cáo BLE
 
 ### Vi điều khiển
 - Mô-đun ESP32C5
@@ -97,19 +97,19 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết k�
 - 4 nút nhấn nhả
 ## Cấu hình các chân IO
 
-```cpp
-// I2C Display Pins
+```
+# Các chân màn hình
 I2C_SDA = GPIO 26
 I2C_SCL = GPIO 25
 
-// Button Pins
+# Các chân nút bấm
 BTN_UP   = GPIO 24
 BTN_DOWN = GPIO 23
 BTN_OK   = GPIO 28
 BTN_BACK = GPIO 10
 
-// OLED Reset
-OLED_RESET = -1 (not used)
+# Thiết lập lại OLED
+OLED_RESET = -1 (không dùng)
 ```
 
 ### Sơ đồ nối dây
@@ -132,14 +132,14 @@ GPIO 10  ------>  Nút QUAY LẠI  ----> GND
 
 ### Yêu cầu thư viện
 
-```cpp
-// Các thư viện lõi
+```
+# Các thư viện lõi
 - U8g2lib              // Driver màn hình OLED
 - NimBLE-Arduino       // Bluetooth LE
 - WiFi                 // Thư viện WiFi ESP32
 - esp_wifi             // Chức năng WiFi cấp thấp
 
-// Thư viện tiêu chuẩn
+# Thư viện tiêu chuẩn
 - Arduino.h
 - Wire.h (I2C)
 - vector (STL)
@@ -147,12 +147,16 @@ GPIO 10  ------>  Nút QUAY LẠI  ----> GND
 - map (STL)
 ```
 
+Ngoài ra, bạn phải có cài bộ quản lý bảng mạch phát triển "esp32" từ Espressif ([mã nguồn]("https://github.com/espressif/arduino-ep32"), [hướng dẫn]("https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html"))
+
+*Trong trường hợp không thể cài do lỗi timeout, hãy tăng timwout limit lên 600s hoặc 1800s*
+
 ### Cài đặt thư viện
 
 **Cách 1: Qua Arduino Library Manager**
 ```
 Tools > Manage Libraries
-Search:  "U8g2"        Install:  U8g2 by oliver
+Search:  "U8g2"       Install:  U8g2 by oliver
 Search: "NimBLE"      Install: NimBLE-Arduino by h2zero
 ```
 
