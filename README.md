@@ -1,8 +1,4 @@
-<h1 align="center">
-  <br>
-  <a href="https://github.com/MathewQuaters/Nova-X-Deauther"><img src="https://github.com/MathewQuaters/Nova-X-Deauther/blob/main/img/frontera-development.png" width="200"></a>
-  <br>
-</h1>
+![logo](https://raw.githubusercontent.com/MathewQuaters/Nova-X-Deauther/refs/heads/main/img/frontera-development.png)
 
 Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
