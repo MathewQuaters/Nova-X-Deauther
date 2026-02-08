@@ -2,7 +2,7 @@
 
 Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
-Công cụ kiểm thử bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
+Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE được thiết kế dành cho nền tảng ESP32C5 với hỗ trợ màn hình OLED U8g2.
 
 > Phần mềm đang trong thử nghiệm beta.
 
