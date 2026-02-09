@@ -117,17 +117,17 @@ OLED_RESET = -1 (không dùng)
 ### Sơ đồ nối dây
 
 ```
-ESP32C5          SSD1306 OLED
+ESP32C5    |  SSD1306 OLED
 GPIO 26  ------>  SDA
 GPIO 25  ------>  SCL
 3.3V     ------>  VCC
 GND      ------>  GND
 
-ESP32C5            Nút bấm
-GPIO 24  ------>  Nút LÊN       ----> GND
-GPIO 23  ------>  Nút XUỐNG     ----> GND
-GPIO 28  ------>  Nút OK        ----> GND
-GPIO 10  ------>  Nút QUAY LẠI  ----> GND
+ESP32C5     |     Nút bấm
+GPIO 24  ------>  Nút UP       ----> GND
+GPIO 23  ------>  Nút DOWN     ----> GND
+GPIO 28  ------>  Nút OK       ----> GND
+GPIO 10  ------>  Nút BACK     ----> GND
 ```
 
 ## Yêu cầu phần mềm
