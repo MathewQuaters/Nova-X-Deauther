@@ -4,7 +4,7 @@ Original repository by [warwick320](https://github.com/warwick320) can be found 
 
 *Bản fork được chỉnh sửa này thuộc dự án Frontera Development*
 
-Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE.
+Công cụ kiểm tra bảo mật WiFi và phát tán quảng cáo bằng BLE.
 
 > Phần mềm đang trong thử nghiệm beta.
 
@@ -149,10 +149,6 @@ GPIO 10  ------>  Nút QUAY LẠI  ----> GND
 - map (STL)
 ```
 
-Ngoài ra, bạn phải có cài bộ quản lý bảng mạch phát triển "esp32" từ Espressif ([mã nguồn](https://github.com/espressif/arduino-esp32), [hướng dẫn](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html))
-
-*Trong trường hợp không thể cài do lỗi timeout, hãy tăng timeout limit lên 600s hoặc 1800s sử dụng git*
-
 ### Cài đặt thư viện
 
 **Cách 1: Qua Arduino Library Manager**
@@ -183,6 +179,8 @@ https://espressif.github.io/arduino-esp32/package_esp32_index.json
 5. Tìm "esp32" và cài đặt "esp32 by Espressif Systems"
 6. Chọn `Tools > Board > ESP32 Arduino > ESP32C5 Dev Module`
 
+*Trong trường hợp không thể cài do lỗi timeout, hãy tăng timeout limit lên 600s hoặc 1800s sử dụng git*
+
 ### Bước 2: Tải Lên Sketch
 
 ### Cách 1 - Tải Lên Bằng Image Uploader (Khuyến Khích)
@@ -192,7 +190,7 @@ https://espressif.github.io/arduino-esp32/package_esp32_index.json
 3. Chọn cổng COM đã kết nối với ESP32C5
 4. Nhấn Upload
 
-### Cách 2 - Tải Lên Qua Sketch
+### Cách 2 - Tải Lên Qua Sketch (Nếu cần chỉnh sửa sketch)
 
 > Trước khi bạn tải lên, bạn cần phải vá bộ soạn ESP32 - [Bộ vá](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - Ví dụ: [platform.txt](https://github.com/7h30th3r0n3/Evil-M5Project/blob/main/utilities/deauth_prerequisites/plateform.txt)
 
