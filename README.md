@@ -2,6 +2,8 @@
 
 Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
+*Bản fork được chỉnh sửa này thuộc dự án Frontera Development*
+
 Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE.
 
 > Phần mềm đang trong thử nghiệm beta.
