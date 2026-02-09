@@ -84,7 +84,7 @@ Công cụ kiểm tra bảo mật WiFi và quảng cáo BLE.
 - Đo lường RSSI
 - Lập bản đồ kênh
 - Phát hiện mã hóa
-## Yêu cầu phần cứng Giả mạo quảng cáo BLE
+## Yêu cầu phần cứng
 
 ### Vi điều khiển
 - Mô-đun ESP32C5
