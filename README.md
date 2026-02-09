@@ -167,7 +167,7 @@ git clone https://github.com/h2zero/NimBLE-Arduino.git
 
 ## Cài đặt
 
-### Bước 1: Thiết Lập Mạch (Nếu bạn thay đổi sketch)
+### Bước 1: Thiết Lập Mạch
 
 1. Mở Arduino IDE
 2. Đi tới `File > Preferences`
@@ -190,7 +190,7 @@ https://espressif.github.io/arduino-esp32/package_esp32_index.json
 3. Chọn cổng COM đã kết nối với ESP32C5
 4. Nhấn Upload
 
-### Cách 2 - Tải Lên Qua Sketch (Nếu cần chỉnh sửa sketch)
+### Cách 2 - Tải Lên Qua Sketch (Nếu chỉnh sửa sketch)
 
 > Trước khi bạn tải lên, bạn cần phải vá bộ soạn ESP32 - [Bộ vá](https://github.com/7h30th3r0n3/Evil-M5Project/tree/main/utilities/deauth_prerequisites) - Ví dụ: [platform.txt](https://github.com/7h30th3r0n3/Evil-M5Project/blob/main/utilities/deauth_prerequisites/plateform.txt)
 
