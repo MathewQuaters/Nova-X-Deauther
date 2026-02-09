@@ -1,6 +1,6 @@
 ![logo](https://raw.githubusercontent.com/MathewQuaters/Nova-X-Deauther/refs/heads/main/img/frontera-development.png)
 
-Original repository can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
+Original repository by [warwick320](https://github.com/warwick320) can be found [here](https://github.com/warwick320/Nova-X-5G-Deauther).
 
 *Bản fork được chỉnh sửa này thuộc dự án Frontera Development*
 
